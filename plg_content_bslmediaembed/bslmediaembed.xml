@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="content" method="upgrade">
+    <name>PLG_CONTENT_BSLMEDIAEMBED</name>
+    <version>0.1.0</version>
+    <author>Vasilyev Alexander</author>
+    <authorEmail>soft@bsl-world.ru</authorEmail>
+    <authorUrl>https://bsl-world.ru</authorUrl>
+    <creationDate>September 2026</creationDate>
+    <copyright>Copyright (C) 2026 Vasilyev Alexander (BSL-World.ru).</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <description>PLG_CONTENT_BSLMEDIAEMBED_DESCRIPTION</description>
+    <namespace path="src">BSL\Plugin\Content\BslMediaEmbed</namespace>
+    <changelogurl>https://bsl-world.ru/downloads/bsl-media-embed/changelog.xml</changelogurl>
+
+    <files>
+        <folder plugin="bslmediaembed">services</folder>
+        <folder>src</folder>
+        <filename>CHANGELOG.md</filename>
+        <filename>LICENSE.txt</filename>
+        <filename>README.md</filename>
+    </files>
+
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_content_bslmediaembed.ini</language>
+        <language tag="en-GB">language/en-GB/plg_content_bslmediaembed.sys.ini</language>
+        <language tag="ru-RU">language/ru-RU/plg_content_bslmediaembed.ini</language>
+        <language tag="ru-RU">language/ru-RU/plg_content_bslmediaembed.sys.ini</language>
+    </languages>
+
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="BSL Media Embed Updates"
+        >https://bsl-world.ru/downloads/bsl-media-embed/updates.xml</server>
+    </updateservers>
+</extension>

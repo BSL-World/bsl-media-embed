@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changelogs>
+    <changelog>
+        <element>bslmediaembed</element>
+        <type>plugin</type>
+        <folder>content</folder>
+        <version>0.1.0</version>
+
+        <addition>
+            <item>Editor-safe bslvideo shortcode.</item>
+            <item>Responsive HTML5 video player generated during Joomla content preparation.</item>
+            <item>Logical media key validation.</item>
+            <item>Optional width and height shortcode attributes.</item>
+            <item>English and Russian localization.</item>
+            <item>Joomla Update System metadata.</item>
+        </addition>
+
+        <note>
+            <item>Compatibility verified on Jomla 5 and Jomla 6.</item>
+            <item>A configured download.php gateway is required to deliver media files.</item>
+        </note>
+    </changelog>
+</changelogs>
