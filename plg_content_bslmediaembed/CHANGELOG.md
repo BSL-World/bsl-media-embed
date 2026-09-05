@@ -2,6 +2,16 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.1.1] - 2026-09-04
+
+### Changed
+
+- Completed Joomla Update System delivery configuration.
+
+### Note
+
+- No functional changes to shortcode rendering or video playback.
+
 ## [0.1.0] - 2026-09-04
 
 ### Added
@@ -12,4 +22,4 @@ All notable changes to BSL Media Embed are documented in this file.
 - Optional `width` and `height` shortcode attributes.
 - English and Russian localization.
 - Joomla 5 and Joomla 6 compatibility.
-- Jomla Update System metadata.
+- Joomla Update System metadata.

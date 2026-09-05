@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="plugin" group="content" method="upgrade">
     <name>PLG_CONTENT_BSLMEDIAEMBED</name>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <author>Vasilyev Alexander</author>
     <authorEmail>soft@bsl-world.ru</authorEmail>
     <authorUrl>https://bsl-world.ru</authorUrl>

@@ -4,6 +4,21 @@
         <element>bslmediaembed</element>
         <type>plugin</type>
         <folder>content</folder>
+        <version>0.1.1</version>
+
+        <change>
+            <item>Completed Joomla Update System delivery configuration.</item>
+        </change>
+
+        <note>
+            <item>No functional changes to shortcode rendering or video playback.</item>
+        </note>
+    </changelog>
+
+    <changelog>
+        <element>bslmediaembed</element>
+        <type>plugin</type>
+        <folder>content</folder>
         <version>0.1.0</version>
 
         <addition>
@@ -16,7 +31,7 @@
         </addition>
 
         <note>
-            <item>Compatibility verified on Jomla 5 and Jomla 6.</item>
+            <item>Compatibility verified on Joomla 5 and Joomla 6.</item>
             <item>A configured download.php gateway is required to deliver media files.</item>
         </note>
     </changelog>
