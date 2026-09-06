@@ -2,23 +2,23 @@
 <updates>
     <update>
         <name>BSL Media Embed</name>
-        <description>Editor-safe HTML5 video embedding plugin for Joomla.</description>
+        <description>Editor-safe HTML5 audio and video embedding plugin for Joomla.</description>
         <element>bslmediaembed</element>
         <type>plugin</type>
         <folder>content</folder>
-        <version>0.1.1</version>
+        <version>0.2.0</version>
         <client>site</client>
 
         <downloads>
             <downloadurl
                 type="full"
                 format="zip"
-            >https://bsl-world.ru/download.php?file=bsl-media-embed-0.1.1&amp;download=1&amp;source=joomla</downloadurl>
+            >https://bsl-world.ru/download.php?file=bsl-media-embed-0.2.0&amp;download=1&amp;source=joomla</downloadurl>
         </downloads>
 
         <targetplatform name="joomla" version="[56]\.[0-9]+" />
         <php_minimum>8.1.0</php_minimum>
-        <sha256>4EE143389A5E1378D581CB3FA862444455D9155B8133A667DA310275BEDC30B2</sha256>
+        <sha256>5DFC51669F1E6FF0AA88662AC43D44C37FF8C464D283A2004B18F1C5F8AE49ED</sha256>
         <changelogurl>https://bsl-world.ru/downloads/bsl-media-embed/changelog.xml</changelogurl>
     </update>
 </updates>

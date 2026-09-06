@@ -4,6 +4,26 @@
         <element>bslmediaembed</element>
         <type>plugin</type>
         <folder>content</folder>
+        <version>0.2.0</version>
+
+        <addition>
+            <item>Added the editor-safe bslaudio shortcode.</item>
+            <item>Added a responsive HTML5 audio player with optional maximum width.</item>
+        </addition>
+
+        <change>
+            <item>Unified audio and video shortcode processing while preserving existing video behavior.</item>
+        </change>
+
+        <note>
+            <item>Compatibility verified on Joomla 5 and Joomla 6 with PHP 8.1, 8.2, and 8.4.</item>
+        </note>
+    </changelog>
+
+    <changelog>
+        <element>bslmediaembed</element>
+        <type>plugin</type>
+        <folder>content</folder>
         <version>0.1.1</version>
 
         <change>

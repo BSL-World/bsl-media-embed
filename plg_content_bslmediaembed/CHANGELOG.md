@@ -2,7 +2,7 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
-## [0.2.0-dev1] - 2026-09-06
+## [0.2.0] - 2026-09-06
 
 ### Added
 
