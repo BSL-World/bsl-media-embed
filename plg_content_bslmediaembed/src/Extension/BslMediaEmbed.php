@@ -23,18 +23,19 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
 {
     protected $autoloadLanguage = true;
 
-    private const DEFAULT_WIDTH = 360;
-    private const DEFAULT_HEIGHT = 240;
+    private const DEFAULT_VIDEO_WIDTH = 360;
+    private const DEFAULT_VIDEO_HEIGHT = 240;
+    private const DEFAULT_AUDIO_WIDTH = 640;
     private const MAX_DIMENSION = 4096;
 
     public static function getSubscribedEvents(): array
     {
         return [
-            'onContentPrepare' => 'replaceVideoShortcodes',
+            'onContentPrepare' => 'replaceMediaShortcodes',
         ];
     }
 
-    public function replaceVideoShortcodes(ContentPrepareEvent $event): void
+    public function replaceMediaShortcodes(ContentPrepareEvent $event): void
     {
         if (!$this->getApplication()->isClient('site')) {
             return;
@@ -46,13 +47,20 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
             return;
         }
 
-        if (!str_contains($item->text, '{bslvideo')) {
+        if (
+            stripos($item->text, '{bslvideo') === false
+            && stripos($item->text, '{bslaudio') === false
+        ) {
             return;
         }
 
         $result = preg_replace_callback(
-            '~\{bslvideo\s+([^{}]+)\}~i',
-            fn(array $matches): string => $this->renderVideo($matches[0], $matches[1]),
+            '~\{bsl(video|audio)\s+([^{}]+)\}~i',
+            fn(array $matches): string => $this->renderMedia(
+                strtolower($matches[1]),
+                $matches[0],
+                $matches[2]
+            ),
             $item->text
         );
 
@@ -61,8 +69,11 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         }
     }
 
-    private function renderVideo(string $shortcode, string $attributeText): string
-    {
+    private function renderMedia(
+        string $mediaType,
+        string $shortcode,
+        string $attributeText
+    ): string {
         $attributes = $this->parseAttributes($attributeText);
         $file = $attributes['file'] ?? '';
 
@@ -70,19 +81,32 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
             return $shortcode;
         }
 
-        $width = $this->parseDimension($attributes['width'] ?? '', self::DEFAULT_WIDTH);
-        $height = $this->parseDimension($attributes['height'] ?? '', self::DEFAULT_HEIGHT);
-        $query = http_build_query(
-            ['file' => $file, 'source' => 'site'],
-            '',
-            '&',
-            PHP_QUERY_RFC3986
-        );
-        $source = Uri::root(true) . '/download.php?' . $query;
         $escapedSource = htmlspecialchars(
-            $source,
+            $this->buildSource($file),
             ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
             'UTF-8'
+        );
+
+        if ($mediaType === 'audio') {
+            $width = $this->parseDimension(
+                $attributes['width'] ?? '',
+                self::DEFAULT_AUDIO_WIDTH
+            );
+
+            return sprintf(
+                '<audio class="bsl-media-audio" src="%s" controls="controls" preload="none" style="width: 100%%; max-width: %dpx;"></audio>',
+                $escapedSource,
+                $width
+            );
+        }
+
+        $width = $this->parseDimension(
+            $attributes['width'] ?? '',
+            self::DEFAULT_VIDEO_WIDTH
+        );
+        $height = $this->parseDimension(
+            $attributes['height'] ?? '',
+            self::DEFAULT_VIDEO_HEIGHT
         );
 
         return sprintf(
@@ -91,6 +115,18 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
             $width,
             $height
         );
+    }
+
+    private function buildSource(string $file): string
+    {
+        $query = http_build_query(
+            ['file' => $file, 'source' => 'site'],
+            '',
+            '&',
+            PHP_QUERY_RFC3986
+        );
+
+        return Uri::root(true) . '/download.php?' . $query;
     }
 
     private function parseAttributes(string $attributeText): array
