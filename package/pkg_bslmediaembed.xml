@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="package" method="upgrade">
+    <name>BSL Media Embed Package</name>
+    <packagename>bslmediaembed</packagename>
+    <version>0.6.0</version>
+    <creationDate>2026-11-11</creationDate>
+    <author>Vasilyev Alexander</author>
+    <license>GNU General Public License version 2 or later</license>
+    <description>BSL Media Embed content renderer and editor button.</description>
+    <blockChildUninstall>true</blockChildUninstall>
+    <updateservers>
+        <server type="extension" priority="1" name="BSL Media Embed Package Updates">https://bsl-world.ru/downloads/bsl-media-embed/package-updates.xml</server>
+    </updateservers>
+    <files folder="packages">
+        <file type="component" id="com_bslmedia">com_bslmedia.zip</file>
+        <file type="plugin" id="bslmediaembed" group="content">plg_content_bslmediaembed.zip</file>
+        <file type="plugin" id="bslmedia" group="editors-xtd">plg_editors-xtd_bslmedia.zip</file>
+    </files>
+</extension>

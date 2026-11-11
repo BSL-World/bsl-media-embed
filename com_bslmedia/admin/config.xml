@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config><fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
+<field name="root" type="hidden" filter="string" />
+<field name="max_upload_mb" type="hidden" filter="integer" default="64" />
+<field name="max_upload_value" type="hidden" filter="string" />
+<field name="max_upload_unit" type="hidden" filter="cmd" default="MB" />
+<field name="max_upload_bytes" type="hidden" filter="integer" />
+<field name="files" type="hidden" filter="raw" default="{}" />
+<field name="rules" type="rules" label="JCONFIG_PERMISSIONS_LABEL" component="com_bslmedia" section="component" /></fieldset></config>

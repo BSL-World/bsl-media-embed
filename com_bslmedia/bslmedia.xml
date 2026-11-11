@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade"><name>COM_BSLMEDIA</name><version>0.6.0</version><creationDate>2026-11-11</creationDate>
+    <author>Vasilyev Alexander</author><license>GNU General Public License version 2 or later</license><description>COM_BSLMEDIA_DESC</description><namespace path="src">BSL\Component\Bslmedia</namespace>
+<files folder="site"><folder>src</folder></files>
+<media destination="com_bslmedia" folder="media"><filename>library.js</filename></media>
+<administration><menu>COM_BSLMEDIA</menu><files folder="admin"><folder>services</folder><folder>src</folder><folder>tmpl</folder><filename>config.xml</filename><filename>access.xml</filename><filename>LICENSE.txt</filename></files><languages folder="admin/language"><language tag="en-GB">en-GB/com_bslmedia.ini</language><language tag="en-GB">en-GB/com_bslmedia.sys.ini</language><language tag="ru-RU">ru-RU/com_bslmedia.ini</language><language tag="ru-RU">ru-RU/com_bslmedia.sys.ini</language></languages></administration>
+</extension>

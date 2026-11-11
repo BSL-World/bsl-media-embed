@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="editors-xtd" method="upgrade">
+    <name>PLG_EDITORSXTD_BSLMEDIA</name>
+    <version>0.6.0</version>
+    <creationDate>2026-11-11</creationDate>
+    <author>Vasilyev Alexander</author>
+    <license>GNU General Public License version 2 or later</license>
+    <description>PLG_EDITORSXTD_BSLMEDIA_DESCRIPTION</description>
+    <scriptfile>script.php</scriptfile>
+    <namespace path="src">BSL\Plugin\EditorsXtd\BslMedia</namespace>
+    <files><folder plugin="bslmedia">services</folder><folder>src</folder><filename>script.php</filename></files>
+    <media destination="plg_editors-xtd_bslmedia" folder="media">
+        <filename>button.js</filename><filename>parser.js</filename><filename>library-picker.js</filename>
+    </media>
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_editors-xtd_bslmedia.ini</language>
+        <language tag="en-GB">language/en-GB/plg_editors-xtd_bslmedia.sys.ini</language>
+        <language tag="ru-RU">language/ru-RU/plg_editors-xtd_bslmedia.ini</language>
+        <language tag="ru-RU">language/ru-RU/plg_editors-xtd_bslmedia.sys.ini</language>
+    </languages>
+</extension>

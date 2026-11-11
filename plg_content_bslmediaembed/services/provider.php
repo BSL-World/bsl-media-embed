@@ -16,6 +16,8 @@ use BSL\Plugin\Content\BslMediaEmbed\Extension\BslMediaEmbed;
 use Joomla\CMS\Extension\PluginInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\DispatcherInterface;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 
@@ -28,7 +30,11 @@ return new class () implements ServiceProviderInterface {
                 BslMediaEmbed::class,
                 static function (Container $container): PluginInterface {
                     $config = (array) PluginHelper::getPlugin('content', 'bslmediaembed');
-                    $plugin = new BslMediaEmbed($config);
+                    // Early Joomla 5 requires the dispatcher constructor; newer 5/6 accepts config.
+                    $type = (new ReflectionMethod(CMSPlugin::class, '__construct'))->getParameters()[0]->getType();
+                    $plugin = $type instanceof ReflectionNamedType && $type->getName() === DispatcherInterface::class
+                        ? new BslMediaEmbed($container->get(DispatcherInterface::class), $config)
+                        : new BslMediaEmbed($config);
 
                     $plugin->setApplication(Factory::getApplication());
 

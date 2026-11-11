@@ -1,0 +1,26 @@
+<?php
+namespace BSL\Component\Bslmedia\Administrator\Controller;
+defined('_JEXEC') or die;
+use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Router\Route;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Toolbar\ToolbarHelper;
+use BSL\Component\Bslmedia\Site\Service\MediaStream;
+use BSL\Component\Bslmedia\Administrator\Service\MediaLibrary;
+final class DisplayController extends BaseController
+{
+    public function display($cachable=false,$urlparams=[])
+    {
+        $user=$this->app->getIdentity();
+        $allowed=static fn($action)=>$user->authorise('core.admin','com_bslmedia')||$user->authorise($action,'com_bslmedia');
+        if(!$allowed('core.manage')&&!$allowed('media.upload')&&!$allowed('media.create'))throw new \RuntimeException('Forbidden',403);
+        ToolbarHelper::title('BSL Media');
+        if($allowed('core.admin'))ToolbarHelper::preferences('com_bslmedia');
+        $params=ComponentHelper::getParams('com_bslmedia');$root=MediaStream::resolveRoot((string)$params->get('root',''),JPATH_ROOT);
+        $folder=$this->input->getString('folder','');
+        try{if($root!=='')MediaLibrary::directory($root,$folder);}catch(\RuntimeException $e){$this->app->enqueueMessage(\Joomla\CMS\Language\Text::_($e->getMessage()),'error');$folder='';}
+        $this->app->getDocument()->getWebAssetManager()->registerAndUseScript('com_bslmedia.library',\Joomla\CMS\Uri\Uri::root().'media/com_bslmedia/library.js',['version'=>'0.6.0'],['defer'=>true]);
+        require dirname(__DIR__,2).'/tmpl/library.php';
+        return $this;
+    }
+}

@@ -50,12 +50,14 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         if (
             stripos($item->text, '{bslvideo') === false
             && stripos($item->text, '{bslaudio') === false
+            && stripos($item->text, '{bslyandexmusic') === false
+            && stripos($item->text, '{bslyoutube') === false
         ) {
             return;
         }
 
         $result = preg_replace_callback(
-            '~\{bsl(video|audio)\s+([^{}]+)\}~i',
+            '~\{bsl(video|audio|yandexmusic|youtube)\s+([^{}]+)\}~i',
             fn(array $matches): string => $this->renderMedia(
                 strtolower($matches[1]),
                 $matches[0],
@@ -74,6 +76,10 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         string $shortcode,
         string $attributeText
     ): string {
+        if ($mediaType === 'yandexmusic' || $mediaType === 'youtube') {
+            return $this->renderProvider($mediaType, $shortcode, $attributeText);
+        }
+
         $attributes = $this->parseAttributes($attributeText);
         $file = $attributes['file'] ?? '';
 
@@ -117,16 +123,60 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         );
     }
 
+    private function renderProvider(string $type, string $shortcode, string $text): string
+    {
+        $attributes = [];
+        while ($text !== '') {
+            if (!preg_match('~^\s*([a-z]+)="([^"<>]*)"(\s+|$)~i', $text, $match)) {
+                return $shortcode;
+            }
+            $key = strtolower($match[1]);
+            if (isset($attributes[$key])) {
+                return $shortcode;
+            }
+            $attributes[$key] = $match[2];
+            $text = substr($text, strlen($match[0]));
+        }
+
+        ksort($attributes);
+        if ($type === 'youtube') {
+            if (array_keys($attributes) !== ['video']
+                || !preg_match('~^[A-Za-z0-9_-]{11}$~D', $attributes['video'])) {
+                return $shortcode;
+            }
+            $source = htmlspecialchars('https://www.youtube.com/embed/' . $attributes['video'], ENT_QUOTES, 'UTF-8');
+            return '<iframe class="bsl-media-youtube" title="YouTube" src="' . $source
+                . '" width="640" height="360" style="border:0;width:100%;height:auto;aspect-ratio:16/9;"'
+                . ' allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen="allowfullscreen"'
+                . ' referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+        }
+
+        if (array_keys($attributes) !== ['album', 'track']) {
+            return $shortcode;
+        }
+        foreach ($attributes as $id) {
+            if (!preg_match('~^[1-9][0-9]{0,19}$~D', $id)) {
+                return $shortcode;
+            }
+        }
+        $path = '/album/' . $attributes['album'] . '/track/' . $attributes['track'];
+        $source = htmlspecialchars('https://music.yandex.ru/iframe' . $path, ENT_QUOTES, 'UTF-8');
+        return '<iframe class="bsl-media-yandexmusic" title="Yandex Music" frameborder="0"'
+            . ' allow="clipboard-write" style="border:none;width:100%;height:122px;" width="100%" height="122"'
+            . ' src="' . $source . '"><a href="https://music.yandex.ru' . $path
+            . '?utm_source=web&amp;utm_medium=copy_link">Yandex Music</a></iframe>';
+    }
+
     private function buildSource(string $file): string
     {
         $query = http_build_query(
-            ['file' => $file, 'source' => 'site'],
+            ['option' => 'com_bslmedia', 'task' => 'media.stream', 'file' => $file],
             '',
             '&',
             PHP_QUERY_RFC3986
         );
 
-        return Uri::root(true) . '/download.php?' . $query;
+        return Uri::root(true) . '/index.php?' . $query;
     }
 
     private function parseAttributes(string $attributeText): array
