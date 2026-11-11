@@ -1,5 +1,7 @@
 # BSL Media Embed 0.6.0 — development candidate
 
+See [project history / история развития](HISTORY.md) for the reconstructed milestones, original Git commits and acceptance boundaries.
+
 The existing BSL Media editor button now also offers a read-only site-file picker with search, folder/type filters and 30 results per page. See [editor instructions and access rules](package/EDITOR.md). Candidate 0.6.0 still needs acceptance in real JCE/TinyMCE after installation. All four extension manifests include version 0.6.0 and creation date 2026-11-11.
 
 The Joomla media library supports inline settings, bounded server folder selection, two folder levels, multi-file MP3/MP4/Opus upload and copying shortcodes. There are no delete, rename, move or overwrite operations, even for administrators. Read [configuration, ACL and migration](package/LIBRARY.md). This and the earlier candidates are unpublished.
