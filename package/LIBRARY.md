@@ -1,4 +1,4 @@
-# BSL Media library — candidate 0.7.0
+# BSL Media library — candidate 0.8.0
 
 ## One open folder
 
@@ -32,6 +32,8 @@ No deletion, renaming, moving or overwriting exists for any role, including admi
 
 Media delivery supports GET/HEAD, one byte Range with 206/416 metadata, exact lengths, 64 KiB body chunks, nosniff and attachment download=1. It needs 64-bit PHP; proxy compression must not change lengths. Cache-Control is no-store; ETag/If-Range caching is not implemented. Manually placed media remain trusted administrator content.
 
-Install only the complete pkg_bslmediaembed ZIP. Existing IDs/settings must survive an upgrade. 0.7.0 is an unpublished candidate: unit fixtures and mocks do not prove real Joomla navigation, multipart upload, Publisher ACL, visual rendering, audible playback or hosting behaviour. Alexander installs through the supplied Joomla6 interface with an up-to-date Akeeba backup, then Codex reads installed state; each next manual step is agreed separately. Joomla5, uninstall/rollback, symlink/junction and large-file/hosting checks remain separate gates. No environments are created automatically.
+Install only the complete pkg_bslmediaembed ZIP. Existing IDs/settings must survive an upgrade. 0.8.0 is an unpublished candidate: unit fixtures and mocks do not prove real Joomla navigation, multipart upload, Publisher ACL, visual rendering, audible playback or hosting behaviour. Alexander installs through the supplied Joomla6 interface with an up-to-date Akeeba backup, then Codex reads installed state; each next manual step is agreed separately. Joomla5, uninstall/rollback, symlink/junction and large-file/hosting checks remain separate gates. No environments are created automatically.
 
 Production migration remains separate: inventory every download.php consumer, back up files/DB/settings, preserve old keys, verify existing articles and new component URLs, range/download and editors; keep documents/distributions with BSL Download Service. Do not remove download.php until all consumers are accounted for and Alexander explicitly approves. Restore the agreed backup and cache for rollback while retaining external media. Extension uninstall is not rollback.
+
+See [optional player formatting](FORMATTING.md) for text wrapping, width, spacing and narrow-screen behaviour.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="plugin" group="content" method="upgrade">
     <name>PLG_CONTENT_BSLMEDIAEMBED</name>
-    <version>0.7.0</version>
+    <version>0.8.0</version>
     <author>Vasilyev Alexander</author>
     <authorEmail>soft@bsl-world.ru</authorEmail>
     <authorUrl>https://bsl-world.ru</authorUrl>
@@ -19,6 +19,10 @@
         <filename>LICENSE.txt</filename>
         <filename>README.md</filename>
     </files>
+
+    <media destination="plg_content_bslmediaembed" folder="media">
+        <filename>layout.css</filename>
+    </media>
 
     <languages>
         <language tag="en-GB">language/en-GB/plg_content_bslmediaembed.ini</language>

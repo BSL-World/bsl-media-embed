@@ -1,8 +1,8 @@
-# BSL Media Embed 0.7.0 — development candidate
+# BSL Media Embed 0.8.0 — development candidate
 
 See [project history / история развития](HISTORY.md) for the reconstructed milestones, original Git commits and acceptance boundaries.
 
-The existing BSL Media editor button now also offers a read-only site-file picker with search, folder/type filters and 30 results per page. See [editor instructions and access rules](package/EDITOR.md). Alexander confirmed creating an article with two shortcodes and checking its frontend output on 0.6.0. Candidate 0.7.0 awaits installation and its own acceptance. All four manifests use version 0.7.0 and date 2026-11-12.
+The existing BSL Media editor button now also offers a read-only site-file picker with search, folder/type filters and 30 results per page. See [editor instructions and access rules](package/EDITOR.md). Alexander confirmed creating an article with two shortcodes and checking its frontend output on 0.6.0. Candidate 0.8.0 awaits installation and its own acceptance. All four manifests use version 0.8.0 and date 2026-11-12.
 
 The Joomla media library has one folder view with breadcrumbs: open a folder, view its files, upload here or create a subfolder here. Root location and file limits remain in collapsible administrator settings. The old two-level restriction is replaced by technical limits of 32 levels and 20,000 scanned entries. Multi-file MP3/MP4/Opus upload and shortcode copying remain available. There are no delete, rename, move or overwrite operations, even for administrators. Read [configuration, ACL and migration](package/LIBRARY.md). This and the earlier candidates are unpublished.
 
@@ -64,3 +64,5 @@ Results: `dist/browser-dom.html`, `dist/browser-errors.log`. The browser uses a 
 ## Installation, updates and acceptance
 
 See [package/UPGRADE.md](package/UPGRADE.md) and the exact [isolation procedure](package/ISOLATED-ACCEPTANCE.md). Do not deploy this candidate to the working site or disable Sourcerer until isolated acceptance is complete.
+
+See [optional player formatting](package/FORMATTING.md) for text wrapping, width, spacing and narrow-screen behaviour.

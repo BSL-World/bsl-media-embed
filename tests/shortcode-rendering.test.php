@@ -6,6 +6,7 @@ namespace Joomla\CMS\Plugin {
     class CMSPlugin
     {
         public static bool $site = true;
+        public static ?object $assets = null;
         private object $application;
 
         public function __construct()
@@ -14,6 +15,17 @@ namespace Joomla\CMS\Plugin {
                 public function isClient(string $client): bool
                 {
                     return CMSPlugin::$site && $client === 'site';
+                }
+                public function getDocument(): object { return $this; }
+                public function getWebAssetManager(): object {
+                    return CMSPlugin::$assets ??= new class {
+                        public array $styles=[];
+                        public array $used=[];
+                        public int $registrations=0;
+                        public function assetExists($type,$name):bool{return isset($this->styles[$name]);}
+                        public function registerStyle($name,$url,$options):void{$this->registrations++;$this->styles[$name]=[$url,$options];}
+                        public function useStyle($name):void{$this->used[$name]=true;}
+                    };
                 }
             };
         }
@@ -44,7 +56,7 @@ namespace Joomla\CMS\Uri {
     {
         public static function root(bool $pathOnly = false): string
         {
-            return '/joomla';
+            return $pathOnly ? '/joomla' : 'https://example.test/joomla/';
         }
     }
 }
@@ -154,5 +166,28 @@ namespace {
     foreach ([(object) [], (object) ['text' => null], (object) ['text' => []]] as $item) {
         (new BslMediaEmbed())->replaceMediaShortcodes(new ContentPrepareEvent($item));
     }
+    if (\Joomla\CMS\Plugin\CMSPlugin::$assets !== null) throw new RuntimeException('Legacy shortcodes must not require layout CSS');
+    foreach (['bslvideo file="clip"','bslaudio file="sound"','bslyoutube video="ZyBl3noTNSs"','bslyandexmusic album="3513" track="42612"'] as $base) {
+        foreach (['left','right','center','none'] as $align) {
+            $html=renderText('{'.$base.' align="'.$align.'" width="320" gap="20"}');
+            expectContains('<span class="bsl-media-layout bsl-media-align-'.$align.'"',$html);
+            expectContains('--bsl-media-width: 320px; --bsl-media-gap: 20px;',$html);
+            if(renderText($html)!==$html)throw new RuntimeException('Formatted render is not idempotent');
+        }
+        foreach (['align="top"','gap="101"','gap="-1"','gap="1.5"','gap="1;float:right"','align="left" width="4097"','align="left" width="0"','align="left" width="50%"','align="left" width="9999999999999"'] as $bad) {
+            $input='{'.$base.' '.$bad.'}';
+            if(renderText($input)!==$input)throw new RuntimeException('Unsafe new layout rendered: '.$input);
+        }
+    }
+    expectContains('--bsl-media-width: 360px; --bsl-media-gap: 16px;',renderText('{bslvideo file="clip" align="left"}'));
+    expectContains('--bsl-media-width: 640px;',renderText('{bslaudio file="sound" align="right"}'));
+    expectContains('--bsl-media-gap: 0px;',renderText('{bslyoutube video="ZyBl3noTNSs" gap="0"}'));
+    expectContains('--bsl-media-width: 480px;',renderText('{bslyandexmusic album="3513" track="42612" width="480"}'));
+    $inline=renderText('<p>Before {bslvideo file="clip" align="left"} After</p>');
+    expectContains('<p>Before <span',$inline);expectContains('</span> After</p>',$inline);
+    $assets=\Joomla\CMS\Plugin\CMSPlugin::$assets;
+    if($assets->registrations!==1||!isset($assets->used['plg_content_bslmediaembed.layout'])
+        || $assets->styles['plg_content_bslmediaembed.layout'][0]!=='https://example.test/joomla/media/plg_content_bslmediaembed/layout.css')throw new RuntimeException('Wrong/duplicate responsive layout asset');
     echo "OK: media shortcode rendering tests passed\n";
+    echo "PASS optional layout: four player types, enums/bounds, provider width, paragraph-safe wrapper, defaults and one CSS asset\n";
 }

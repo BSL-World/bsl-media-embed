@@ -82,6 +82,8 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
 
         $attributes = $this->parseAttributes($attributeText);
         $file = $attributes['file'] ?? '';
+        $layout = $this->parseLayout($attributes, $mediaType);
+        if ($layout === false) return $shortcode;
 
         if (!preg_match('~^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$~', $file)) {
             return $shortcode;
@@ -99,11 +101,11 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
                 self::DEFAULT_AUDIO_WIDTH
             );
 
-            return sprintf(
+            return $this->wrapLayout(sprintf(
                 '<audio class="bsl-media-audio" src="%s" controls="controls" preload="none" style="width: 100%%; max-width: %dpx;"></audio>',
                 $escapedSource,
                 $width
-            );
+            ), $layout);
         }
 
         $width = $this->parseDimension(
@@ -115,12 +117,12 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
             self::DEFAULT_VIDEO_HEIGHT
         );
 
-        return sprintf(
+        return $this->wrapLayout(sprintf(
             '<video class="bsl-media-video" src="%s" controls="controls" preload="none" playsinline="playsinline" width="%d" height="%d" style="max-width: 100%%; height: auto;"></video>',
             $escapedSource,
             $width,
             $height
-        );
+        ), $layout);
     }
 
     private function renderProvider(string $type, string $shortcode, string $text): string
@@ -138,6 +140,9 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
             $text = substr($text, strlen($match[0]));
         }
 
+        $layout = $this->parseLayout($attributes, $type);
+        if ($layout === false) return $shortcode;
+        $attributes = array_diff_key($attributes, array_flip(['align', 'width', 'gap']));
         ksort($attributes);
         if ($type === 'youtube') {
             if (array_keys($attributes) !== ['video']
@@ -145,10 +150,10 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
                 return $shortcode;
             }
             $source = htmlspecialchars('https://www.youtube.com/embed/' . $attributes['video'], ENT_QUOTES, 'UTF-8');
-            return '<iframe class="bsl-media-youtube" title="YouTube" src="' . $source
+            return $this->wrapLayout('<iframe class="bsl-media-youtube" title="YouTube" src="' . $source
                 . '" width="640" height="360" style="border:0;width:100%;height:auto;aspect-ratio:16/9;"'
                 . ' allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen="allowfullscreen"'
-                . ' referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+                . ' referrerpolicy="strict-origin-when-cross-origin"></iframe>', $layout);
         }
 
         if (array_keys($attributes) !== ['album', 'track']) {
@@ -161,10 +166,39 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         }
         $path = '/album/' . $attributes['album'] . '/track/' . $attributes['track'];
         $source = htmlspecialchars('https://music.yandex.ru/iframe' . $path, ENT_QUOTES, 'UTF-8');
-        return '<iframe class="bsl-media-yandexmusic" title="Yandex Music" frameborder="0"'
+        return $this->wrapLayout('<iframe class="bsl-media-yandexmusic" title="Yandex Music" frameborder="0"'
             . ' allow="clipboard-write" style="border:none;width:100%;height:122px;" width="100%" height="122"'
             . ' src="' . $source . '"><a href="https://music.yandex.ru' . $path
-            . '?utm_source=web&amp;utm_medium=copy_link">Yandex Music</a></iframe>';
+            . '?utm_source=web&amp;utm_medium=copy_link">Yandex Music</a></iframe>', $layout);
+    }
+
+    /** null preserves legacy HTML exactly; false rejects malformed new formatting. */
+    private function parseLayout(array $attributes, string $type): array|false|null
+    {
+        $provider = in_array($type, ['youtube', 'yandexmusic'], true);
+        if (!isset($attributes['align']) && !isset($attributes['gap']) && !($provider && isset($attributes['width']))) return null;
+        $align = $attributes['align'] ?? 'none';
+        if (!in_array($align, ['none', 'center', 'left', 'right'], true)) return false;
+        $default = $type === 'video' ? self::DEFAULT_VIDEO_WIDTH : self::DEFAULT_AUDIO_WIDTH;
+        $width = $attributes['width'] ?? (string) $default;
+        $gap = $attributes['gap'] ?? '16';
+        if (!preg_match('~^[0-9]{1,4}$~D', $width) || (int)$width < 1 || (int)$width > self::MAX_DIMENSION
+            || !preg_match('~^[0-9]{1,3}$~D', $gap) || (int)$gap > 100) return false;
+        return ['align'=>$align, 'width'=>(int)$width, 'gap'=>(int)$gap];
+    }
+
+    private function wrapLayout(string $html, ?array $layout): string
+    {
+        if ($layout === null) return $html;
+        $assets = $this->getApplication()->getDocument()->getWebAssetManager();
+        if (!$assets->assetExists('style', 'plg_content_bslmediaembed.layout')) {
+            $assets->registerStyle('plg_content_bslmediaembed.layout', Uri::root() . 'media/plg_content_bslmediaembed/layout.css', ['version'=>'0.8.0']);
+        }
+        $assets->useStyle('plg_content_bslmediaembed.layout');
+        // Only enums and bounded integers enter attributes/CSS, never raw shortcode text.
+        return '<span class="bsl-media-layout bsl-media-align-' . $layout['align']
+            . '" style="--bsl-media-width: ' . $layout['width'] . 'px; --bsl-media-gap: ' . $layout['gap'] . 'px;">'
+            . $html . '</span>';
     }
 
     private function buildSource(string $file): string

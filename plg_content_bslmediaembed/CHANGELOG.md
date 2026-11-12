@@ -2,6 +2,13 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.8.0] - unpublished development candidate, 2026-11-12
+
+- Optional Formatting section in the existing editor dialog: normal/centred/left/right placement, pixel width and space from text.
+- Bounded align/width/gap shortcode parameters for local audio/video, Yandex Music and YouTube; defaults retain previous output.
+- Scoped frontend CSS with desktop wrapping and a narrow-screen reset. Paragraph-safe wrapper and fixed CSS variables; no raw HTML/CSS input.
+- Formatted previews and editor insertion preserve options; media library/upload behaviour is unchanged.
+
 ## [0.7.0] - unpublished development candidate, 2026-11-12
 
 - One media-library folder view with breadcrumbs, current-folder files/search/sorting, Upload here and inline Create subfolder.

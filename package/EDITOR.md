@@ -1,4 +1,4 @@
-# Insert media into an article (0.7.0 candidate)
+# Insert media into an article (0.8.0 candidate)
 
 1. In the article editor, place the cursor where the player should appear.
 2. Click the existing **BSL Media** editor button.
@@ -16,3 +16,5 @@ The catalogue endpoint requires a signed-in user with article create/edit/edit-o
 Automatic tests use fixtures and editor mocks. Actual JCE/TinyMCE placement, source mode, saved articles, Publisher access and playback require acceptance on the supplied Joomla site; they have not been rechecked for this candidate.
 
 Folders deeper than two levels are included. The same technical scan limits apply as in the component; an incomplete-catalogue message is shown when a limit or unreadable folder is encountered.
+
+See [optional player formatting](FORMATTING.md) for text wrapping, width, spacing and narrow-screen behaviour.

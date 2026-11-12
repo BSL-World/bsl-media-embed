@@ -1,0 +1,42 @@
+/* Formatting is opt-in; legacy players without the wrapper are unaffected. */
+.bsl-media-layout {
+  display: block;
+  box-sizing: border-box;
+  width: var(--bsl-media-width, 100%);
+  max-width: 100%;
+  margin: 0 0 var(--bsl-media-gap, 16px);
+}
+.bsl-media-layout > audio,
+.bsl-media-layout > video,
+.bsl-media-layout > iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+.bsl-media-align-center { margin-inline: auto; }
+@media (min-width: 768px) {
+  .bsl-media-align-left {
+    float: left;
+    margin: 0 var(--bsl-media-gap, 16px) var(--bsl-media-gap, 16px) 0;
+  }
+  .bsl-media-align-right {
+    float: right;
+    margin: 0 0 var(--bsl-media-gap, 16px) var(--bsl-media-gap, 16px);
+  }
+}
+@media (max-width: 767px) {
+  .bsl-media-layout {
+    float: none !important;
+    clear: both;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 1rem !important;
+  }
+  /* Local audio retains its legacy inline max-width: reset the player too. */
+  .bsl-media-layout > audio,
+  .bsl-media-layout > video,
+  .bsl-media-layout > iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

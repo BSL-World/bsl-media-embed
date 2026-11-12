@@ -28,7 +28,7 @@ final class BslMedia extends CMSPlugin implements SubscriberInterface
         if (!$wa->assetExists('script', 'editor-button.bslmedia')) {
             // A full same-site URL bypasses WAM's filesystem lookup of /subdirectory/media/.
             $wa->registerScript('editor-button.bslmedia', Uri::root() . 'media/plg_editors-xtd_bslmedia/button.js',
-                ['version' => '0.7.0'], ['type' => 'module'], ['editors']);
+                ['version' => '0.8.0'], ['type' => 'module'], ['editors']);
         }
         // JCE's toolbar menu and Joomla's button layout use different asset names.
         $wa->useScript('editor-button.bslmedia');
@@ -38,7 +38,8 @@ final class BslMedia extends CMSPlugin implements SubscriberInterface
                 .'index.php?option=com_bslmedia&task=library.files',
         ]);
         foreach (['INPUT', 'CANCEL', 'INSERT', 'INVALID', 'REMOVED', 'INSERT_ERROR',
-            'FILES','LINKS','SEARCH','FOLDER','TYPE','ALL','ROOT','LOADING','LOAD_ERROR','EMPTY','PREVIOUS','NEXT','LIMIT'] as $key) {
+            'FILES','LINKS','SEARCH','FOLDER','TYPE','ALL','ROOT','LOADING','LOAD_ERROR','EMPTY','PREVIOUS','NEXT','LIMIT',
+            'FORMAT','ALIGN','ALIGN_NONE','ALIGN_CENTER','ALIGN_LEFT','ALIGN_RIGHT','WIDTH','GAP','AUTO','MOBILE_HELP','LAYOUT_INVALID'] as $key) {
             Text::script('PLG_EDITORSXTD_BSLMEDIA_' . $key);
         }
         return new Button('bslmedia', [
