@@ -34,7 +34,7 @@ final class MediaLibrary
 
     public static function directory(string $root, string $relative='', int $maxDepth=MediaStream::MAX_DEPTH): string
     {
-        $base=realpath($root);
+        $base=@realpath($root);
         if ($root==='' || $base===false || !is_dir($base)) throw new \RuntimeException('COM_BSLMEDIA_UNCONFIGURED');
         if ($relative==='') return $base;
         $parts=explode('/',$relative);
@@ -42,7 +42,7 @@ final class MediaLibrary
         $path=$base;
         foreach($parts as $part){
             if (!self::name($part)) throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
-            $next=$path.DIRECTORY_SEPARATOR.$part;$resolved=realpath($next);
+            $next=$path.DIRECTORY_SEPARATOR.$part;$resolved=@realpath($next);
             if ($resolved===false || !is_dir($resolved) || is_link($next) || !self::inside($base,$resolved)) throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
             $path=$resolved;
         }
@@ -66,7 +66,10 @@ final class MediaLibrary
             $name=$entry->getFilename();
             if (!self::name($name)) continue;
             $rel=($relative===''?'':$relative.'/').$name;
-            try {self::directory($root,$rel,$maxDepth);$result[]=$rel;}catch(\RuntimeException){}
+            try {
+                $candidate=self::directory($root,$rel,$maxDepth);
+                if(is_readable($candidate)&&(PHP_OS_FAMILY==='Windows'||is_executable($candidate)))$result[]=$rel;
+            }catch(\RuntimeException){}
         }
         natcasesort($result);return array_values($result);
     }

@@ -1,4 +1,4 @@
-# Player formatting — candidate 0.8.0
+# Player formatting — candidate 0.8.1
 
 In an article, place the cursor and click **BSL Media**. Select a site file or paste a Yandex Music/YouTube link. Expand **Formatting** if needed:
 

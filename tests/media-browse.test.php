@@ -7,6 +7,7 @@ namespace {
 define('_JEXEC',1);
 require __DIR__.'/../com_bslmedia/site/src/Service/MediaStream.php';
 require __DIR__.'/../com_bslmedia/admin/src/Service/MediaLibrary.php';
+require __DIR__.'/../com_bslmedia/admin/src/Service/RootBrowser.php';
 require __DIR__.'/../com_bslmedia/admin/src/Controller/ManageController.php';
 use BSL\Component\Bslmedia\Administrator\Controller\ManageController;
 class BrowseClosed extends Exception{}
@@ -29,6 +30,16 @@ try{
  foreach(['../site','Section/Subsection/Third'] as $path){$r=browse(['media.upload'],['mode'=>'destination','relative'=>$path]);same(isset($r['error']),true);}
  try{browse(['media.upload'],['mode'=>'root']);throw new RuntimeException('Uploader got root picker');}catch(RuntimeException $e){same($e->getCode(),403);}
  $r=browse(['core.admin'],['mode'=>'root','scope'=>'site']);same(count($r['folders']),2);
+ same($r['boundary'],realpath($dir));same($r['value'],'..');
+ $r=browse(['core.admin'],['mode'=>'root','initial'=>'library']);same($r['relative'],'media');same($r['value'],'../media');
+ $r=browse(['core.admin'],['mode'=>'root','initial'=>'site']);same($r['relative'],'site');same($r['value'],'.');
+ $r=browse(['core.admin'],['mode'=>'root','relative'=>'media/Section/Subsection']);same($r['value'],'../media/Section/Subsection');
+ same(\BSL\Component\Bslmedia\Site\Service\MediaStream::resolveRoot($r['value'],JPATH_ROOT),realpath($dir.'/media/Section/Subsection'));
+ foreach(['..','../','../outside','media/../../','/','C:/'] as $bad){$r=browse(['core.admin'],['mode'=>'root','scope'=>'media','relative'=>$bad]);same(isset($r['error']),true);}
+ // A previously configured external library must not expand the root chooser boundary.
+ $outside=$dir.'-outside';mkdir($outside);\Joomla\CMS\Component\ComponentHelper::$root=realpath($outside);
+ $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','initial'=>'library']);same($r['relative'],'site');same($r['boundary'],realpath($dir));
+ $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','relative'=>'']);same($r['boundary'],realpath($dir));rmdir($outside);
  echo "PASS $count bounded folder picker checks: Publisher confinement, root ACL, deeper creation and relative paths\n";
-}finally{rmdir($dir.'/media/Section/Subsection');rmdir($dir.'/media/Section');rmdir($dir.'/media');rmdir($dir.'/site');rmdir($dir);}
+}finally{if(isset($outside)&&is_dir($outside))rmdir($outside);rmdir($dir.'/media/Section/Subsection');rmdir($dir.'/media/Section');rmdir($dir.'/media');rmdir($dir.'/site');rmdir($dir);}
 }

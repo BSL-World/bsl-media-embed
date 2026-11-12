@@ -12,7 +12,7 @@ final class MediaStream
         if ($root === '' || str_contains($root, "\0") || str_contains($root, '%') || str_contains($root, '://')) return '';
         $absolute = preg_match('~^(?:/|[A-Za-z]:[\\\\/])~', $root);
         if (!$absolute && preg_match('~^[A-Za-z]:~', $root)) return '';
-        $resolved=realpath($absolute ? $root : $siteRoot.DIRECTORY_SEPARATOR.$root);
+        $resolved=@realpath($absolute ? $root : $siteRoot.DIRECTORY_SEPARATOR.$root);
         return $resolved !== false && is_dir($resolved) && dirname($resolved)!==$resolved ? $resolved : '';
     }
 

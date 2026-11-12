@@ -1,4 +1,4 @@
-# Insert media into an article (0.8.0 candidate)
+# Insert media into an article (0.8.1 candidate)
 
 1. In the article editor, place the cursor where the player should appear.
 2. Click the existing **BSL Media** editor button.

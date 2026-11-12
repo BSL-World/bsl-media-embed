@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension type="component" method="upgrade"><name>COM_BSLMEDIA</name><version>0.8.0</version><creationDate>2026-11-12</creationDate>
+<extension type="component" method="upgrade"><name>COM_BSLMEDIA</name><version>0.8.1</version><creationDate>2026-11-12</creationDate>
     <author>Vasilyev Alexander</author><license>GNU General Public License version 2 or later</license><description>COM_BSLMEDIA_DESC</description><namespace path="src">BSL\Component\Bslmedia</namespace>
 <files folder="site"><folder>src</folder></files>
 <media destination="com_bslmedia" folder="media"><filename>library.js</filename></media>

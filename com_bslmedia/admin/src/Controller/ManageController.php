@@ -9,6 +9,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseInterface;
 use BSL\Component\Bslmedia\Administrator\Service\MediaLibrary;
+use BSL\Component\Bslmedia\Administrator\Service\RootBrowser;
 use BSL\Component\Bslmedia\Site\Service\MediaStream;
 final class ManageController extends BaseController
 {
@@ -87,8 +88,11 @@ final class ManageController extends BaseController
             if(!$this->allowed('core.manage')&&!$this->allowed('media.upload')&&!$this->allowed('media.create'))throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }elseif(!$this->allowed('core.admin'))throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         try{
-            $scope=$this->input->getCmd('scope','site');
-            $anchor=($destination||$scope==='media')?$this->root():dirname(JPATH_ROOT);
+            if(!$destination){
+                $this->json(RootBrowser::read(JPATH_ROOT,$this->root(),$this->input->getString('relative',''),$this->input->getCmd('initial','')));
+                return;
+            }
+            $anchor=$this->root();
             // Never turn the picker into a whole-drive or filesystem-root explorer.
             if($anchor===''||dirname($anchor)===$anchor)throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
             $depth=MediaStream::MAX_DEPTH;

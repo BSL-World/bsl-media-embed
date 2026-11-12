@@ -1,6 +1,6 @@
 # BSL Media Embed
 
-Candidate 0.8.0 uses com_bslmedia: one folder view for files, upload and inline folder creation, with breadcrumbs, name search and reversible size/name/modification sorting. Root location and MB/GB limits remain in collapsible administrator settings. The former two-level restriction is replaced by technical scan limits of 32 levels and 20,000 entries. No deletion, renaming, moving or overwriting. Existing aliases/keys, shortcode syntax and provider behaviour remain. See package/LIBRARY.md.
+Candidate 0.8.1 uses com_bslmedia: one folder view for files, upload and inline folder creation, with breadcrumbs, name search and reversible size/name/modification sorting. Root location and MB/GB limits remain in collapsible administrator settings. The former two-level restriction is replaced by technical scan limits of 32 levels and 20,000 entries. No deletion, renaming, moving or overwriting. Existing aliases/keys, shortcode syntax and provider behaviour remain. See package/LIBRARY.md.
 Optional align/width/gap formatting is available from the editor button. Scoped CSS disables floats below 768px and fits the content width. Existing shortcodes without new formatting retain their previous HTML. See package/FORMATTING.md.
 
 BSL Media Embed is a content plugin for Joomla that replaces editor-safe shortcodes with responsive HTML5 audio and video players.

@@ -49,24 +49,26 @@
   // The only folder dialog selects the library root, inside administrator settings.
   const dialog = document.getElementById('bsl-folder-picker');
   if (!dialog) return;
-  const scope = document.getElementById('bsl-scope'), choose = document.getElementById('bsl-select-folder');
-  let relative = '', current = '', request = 0;
-  async function load(next) {
+  const choose = document.getElementById('bsl-select-folder'), up = document.getElementById('bsl-up');
+  let relative = '', current = '', selected = '', request = 0;
+  async function load(next,initial='') {
     const seq = ++request;
-    relative = next; current = ''; choose.disabled = true;
+    choose.disabled = true; up.disabled = true;
     document.getElementById('bsl-picker-error').textContent = '';
-    document.getElementById('bsl-picker-path').textContent = '';
-    document.getElementById('bsl-picker-folders').replaceChildren();
     try {
       const url = new URL('index.php',location.href);
-      url.search = new URLSearchParams({option:'com_bslmedia',task:'manage.browse',mode:'root',scope:scope.value,relative:next});
+      url.search = new URLSearchParams({option:'com_bslmedia',task:'manage.browse',mode:'root',relative:next,initial});
       const response = await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
       const data = await response.json();
-      if (!response.ok || data.error) throw new Error(data.error || root.dataset.browseError);
+      if (!response.ok || data?.error) throw new Error(typeof data?.error==='string'?data.error:root.dataset.browseError);
+      if (!data||typeof data.path!=='string'||typeof data.relative!=='string'||typeof data.value!=='string'||typeof data.boundary!=='string'
+          || !Array.isArray(data.folders)||!data.folders.every(folder=>folder&&typeof folder.name==='string'&&typeof folder.relative==='string')) throw new Error(root.dataset.browseError);
       if (seq !== request) return;
-      current = data.path; relative = data.relative;
+      current = data.path; relative = data.relative; selected = data.value;
       document.getElementById('bsl-picker-path').textContent = current;
-      document.getElementById('bsl-up').disabled = !relative;
+      document.getElementById('bsl-picker-boundary').textContent = data.boundary;
+      up.disabled = !relative;
+      document.getElementById('bsl-picker-folders').replaceChildren();
       data.folders.forEach(folder => {
         const li = document.createElement('li'), button = document.createElement('button');
         button.type = 'button'; button.className = 'btn btn-link'; button.textContent = folder.name;
@@ -75,13 +77,21 @@
       });
       choose.disabled = false;
     } catch (error) {
-      if (seq === request) document.getElementById('bsl-picker-error').textContent = error instanceof SyntaxError ? root.dataset.browseError : (error.message || root.dataset.browseError);
+      if (seq === request) {
+        document.getElementById('bsl-picker-error').textContent = error instanceof SyntaxError ? root.dataset.browseError : (error.message || root.dataset.browseError);
+        // Keep the last valid path/list after a permission or network failure.
+        choose.disabled = !current; up.disabled = !relative;
+      }
     }
   }
-  document.getElementById('bsl-browse').addEventListener('click',() => { dialog.showModal(); load(''); });
-  scope.addEventListener('change',() => load(''));
-  document.getElementById('bsl-up').addEventListener('click',() => load(relative.split('/').slice(0,-1).join('/')));
-  choose.addEventListener('click',() => { if(current){document.getElementById('bsl-root').value=current;++request;dialog.close();} });
+  document.getElementById('bsl-browse').addEventListener('click',() => {
+    relative='';current='';selected='';document.getElementById('bsl-picker-path').textContent='';
+    document.getElementById('bsl-picker-boundary').textContent='';document.getElementById('bsl-picker-folders').replaceChildren();
+    dialog.showModal();load('','library');
+  });
+  document.getElementById('bsl-site-home').addEventListener('click',() => load('','site'));
+  up.addEventListener('click',() => load(relative.split('/').slice(0,-1).join('/')));
+  choose.addEventListener('click',() => { if(current&&selected){document.getElementById('bsl-root').value=selected;++request;dialog.close();} });
   document.getElementById('bsl-close-picker').addEventListener('click',() => {++request;dialog.close();});
   dialog.addEventListener('cancel',() => {++request;});
 })();

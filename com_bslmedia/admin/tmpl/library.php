@@ -83,7 +83,9 @@ $fileSize=(int)@filesize($root.'/'.$file);$modified=(int)@filemtime($root.'/'.$f
 <?php if($allowed('core.admin')): ?>
 <dialog id="bsl-folder-picker" aria-labelledby="bsl-picker-title" style="width:min(42rem,90vw)">
 <h2 id="bsl-picker-title"><?= $e($t('BROWSE')) ?></h2>
-<div id="bsl-root-scope"><p><?= $e($t('BROWSE_SCOPE')) ?></p><label for="bsl-scope"><?= $e($t('AREA')) ?></label><select id="bsl-scope"><option value="site"><?= $e($t('SITE_AREA')) ?></option><?php if($root!==''): ?><option value="media"><?= $e($t('MEDIA_AREA')) ?></option><?php endif ?></select></div>
+<p><?= $e($t('BROWSE_SCOPE')) ?></p>
+<p><?= $e($t('BROWSE_BOUNDARY')) ?> <strong id="bsl-picker-boundary"></strong></p>
+<button type="button" id="bsl-site-home" class="btn btn-secondary"><?= $e($t('BACK_TO_SITE')) ?></button>
 <p id="bsl-picker-path"></p><button type="button" id="bsl-up" class="btn btn-secondary"><?= $e($t('UP')) ?></button><ul id="bsl-picker-folders"></ul>
 <p id="bsl-picker-error" role="status"></p>
 <button type="button" id="bsl-select-folder" class="btn btn-primary"><?= $e($t('SELECT_FOLDER')) ?></button><button type="button" id="bsl-close-picker" class="btn btn-secondary"><?= $e($t('CLOSE')) ?></button>

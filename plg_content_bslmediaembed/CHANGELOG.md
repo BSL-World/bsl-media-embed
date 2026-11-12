@@ -2,6 +2,12 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.8.1] - unpublished development candidate, 2026-11-12
+
+- Constrain the root folder chooser to one canonical boundary containing the Joomla site, independently of the current media root.
+- Start at the current library/site, add Return to site folder and show the boundary. Keep the last good path/list on errors and hide unreadable folders.
+- Fill a portable Joomla-relative root path on selection; preserve existing/manual absolute settings until explicitly saved.
+
 ## [0.8.0] - unpublished development candidate, 2026-11-12
 
 - Optional Formatting section in the existing editor dialog: normal/centred/left/right placement, pixel width and space from text.
