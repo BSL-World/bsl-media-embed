@@ -10,6 +10,7 @@ require __DIR__.'/../com_bslmedia/admin/src/Service/MediaLibrary.php';
 require __DIR__.'/../com_bslmedia/admin/src/Service/RootBrowser.php';
 require __DIR__.'/../com_bslmedia/admin/src/Controller/ManageController.php';
 use BSL\Component\Bslmedia\Administrator\Controller\ManageController;
+use BSL\Component\Bslmedia\Administrator\Service\RootBrowser;
 class BrowseClosed extends Exception{}
 $dir=__DIR__.'/../dist/browse-unit-'.getmypid();mkdir($dir,0700,true);mkdir($dir.'/site');mkdir($dir.'/media');mkdir($dir.'/media/Section');mkdir($dir.'/media/Section/Subsection');
 define('JPATH_ROOT',realpath($dir.'/site'));\Joomla\CMS\Component\ComponentHelper::$root=realpath($dir.'/media');
@@ -30,7 +31,8 @@ try{
  foreach(['../site','Section/Subsection/Third'] as $path){$r=browse(['media.upload'],['mode'=>'destination','relative'=>$path]);same(isset($r['error']),true);}
  try{browse(['media.upload'],['mode'=>'root']);throw new RuntimeException('Uploader got root picker');}catch(RuntimeException $e){same($e->getCode(),403);}
  $r=browse(['core.admin'],['mode'=>'root','scope'=>'site']);same(count($r['folders']),2);
- same($r['boundary'],realpath($dir));same($r['value'],'..');
+ same($r['location'],['area'=>'container','parts'=>[]]);same($r['value'],'..');
+ same(str_contains(json_encode($r),basename($dir)),false);
  $r=browse(['core.admin'],['mode'=>'root','initial'=>'library']);same($r['relative'],'media');same($r['value'],'../media');
  $r=browse(['core.admin'],['mode'=>'root','initial'=>'site']);same($r['relative'],'site');same($r['value'],'.');
  $r=browse(['core.admin'],['mode'=>'root','relative'=>'media/Section/Subsection']);same($r['value'],'../media/Section/Subsection');
@@ -38,8 +40,20 @@ try{
  foreach(['..','../','../outside','media/../../','/','C:/'] as $bad){$r=browse(['core.admin'],['mode'=>'root','scope'=>'media','relative'=>$bad]);same(isset($r['error']),true);}
  // A previously configured external library must not expand the root chooser boundary.
  $outside=$dir.'-outside';mkdir($outside);\Joomla\CMS\Component\ComponentHelper::$root=realpath($outside);
- $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','initial'=>'library']);same($r['relative'],'site');same($r['boundary'],realpath($dir));
- $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','relative'=>'']);same($r['boundary'],realpath($dir));rmdir($outside);
+ $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','initial'=>'library']);same($r['relative'],'site');same($r['location']['area'],'site');
+ same(RootBrowser::current(JPATH_ROOT,$outside),null);
+ $r=browse(['core.admin'],['mode'=>'root','scope'=>'media','relative'=>'']);same($r['location']['area'],'container');rmdir($outside);
+ same(RootBrowser::current(JPATH_ROOT,realpath($dir.'/media'))['location'],['area'=>'neighbour','parts'=>['media']]);
+ same(RootBrowser::saveValue(JPATH_ROOT,'media',true,'old-root'),'../media');
+ same(RootBrowser::saveValue(JPATH_ROOT,'site',true,'old-root'),'.');
+ same(RootBrowser::saveValue(JPATH_ROOT,'',true,'old-root'),'..');
+ same(RootBrowser::saveValue(JPATH_ROOT,'',false,''),'');
+ foreach(['../','../../outside','/etc','C:/media','%2e%2e',realpath($dir.'/media')] as $forged){
+  try{RootBrowser::saveValue(JPATH_ROOT,$forged,true,'old-root');throw new RuntimeException('Forged root accepted');}
+  catch(RuntimeException $error){same($error->getMessage(),'COM_BSLMEDIA_BAD_PATH');}
+ }
+ try{RootBrowser::saveValue(JPATH_ROOT,'',false,'old-root');throw new RuntimeException('Invalid choice cleared old root');}
+ catch(RuntimeException $error){same($error->getMessage(),'COM_BSLMEDIA_ROOT_RESELECT');}
  echo "PASS $count bounded folder picker checks: Publisher confinement, root ACL, deeper creation and relative paths\n";
 }finally{if(isset($outside)&&is_dir($outside))rmdir($outside);rmdir($dir.'/media/Section/Subsection');rmdir($dir.'/media/Section');rmdir($dir.'/media');rmdir($dir.'/site');rmdir($dir);}
 }

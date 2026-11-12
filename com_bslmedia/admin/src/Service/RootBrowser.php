@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace BSL\Component\Bslmedia\Administrator\Service;
+use BSL\Component\Bslmedia\Site\Service\MediaStream;
 
 /** Read-only root chooser: one canonical boundary, independent of stored media scope. */
 final class RootBrowser
@@ -21,6 +22,26 @@ final class RootBrowser
         while(isset($a[$common],$b[$common])&&self::same($a[$common],$b[$common]))$common++;
         $parts=array_merge(array_fill(0,count($a)-$common,'..'),array_slice($b,$common));
         return $parts===[]?'.':implode('/',$parts);
+    }
+
+    public static function current(string $siteRoot,string $mediaRoot):?array
+    {
+        if($mediaRoot==='')return null;
+        try{
+            $choice=self::read($siteRoot,$mediaRoot,'','library');
+            $resolved=MediaStream::resolveRoot($choice['value'],$siteRoot);
+            return $resolved!==''&&self::same($resolved,(string)@realpath($mediaRoot))?$choice:null;
+        }catch(\RuntimeException){return null;}
+    }
+
+    public static function saveValue(string $siteRoot,string $choice,bool $selected,string $storedRoot):string
+    {
+        if(!$selected){
+            if($storedRoot==='')return '';
+            throw new \RuntimeException('COM_BSLMEDIA_ROOT_RESELECT');
+        }
+        // Only a boundary-relative chooser value is accepted, never a submitted server path.
+        return self::read($siteRoot,'',$choice)['value'];
     }
 
     public static function read(string $siteRoot,string $mediaRoot,string $relative='',string $initial=''):array
@@ -44,7 +65,11 @@ final class RootBrowser
         if(!self::readable($dir))throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
         $folders=MediaLibrary::folders($boundary,$relative);
         $value=self::relativeValue($site,$dir);
-        return ['path'=>$dir,'relative'=>$relative,'value'=>$value,'boundary'=>$boundary,'canCreate'=>false,
+        if(self::same($dir,$site))$location=['area'=>'site','parts'=>[]];
+        elseif(self::same($dir,$boundary))$location=['area'=>'container','parts'=>[]];
+        elseif(MediaLibrary::inside($site,$dir))$location=['area'=>'site','parts'=>explode('/',self::relativeValue($site,$dir))];
+        else $location=['area'=>'neighbour','parts'=>explode('/',$relative)];
+        return ['location'=>$location,'boundaryArea'=>self::same($boundary,$site)?'site':'container','relative'=>$relative,'value'=>$value,'canCreate'=>false,
             'folders'=>array_map(static fn($path)=>['relative'=>$path,'name'=>basename($path)],$folders)];
     }
 }

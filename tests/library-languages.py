@@ -8,6 +8,7 @@ for path in (root/'com_bslmedia').rglob('*'):
  used.update(re.findall(r'COM_BSLMEDIA_[A-Z_]+',text))
  used.update('COM_BSLMEDIA_'+s for s in re.findall(r"\$t\('([A-Z_]+)'\)",text))
 used.update('COM_BSLMEDIA_'+s for s in ['FILE','FOLDER','TYPE','SIZE','KEY','SHORTCODE'])
+used.update('COM_BSLMEDIA_'+s for s in ['WITHIN_SITE','BESIDE_SITE','SITE_CONTAINER','ROOT_NOT_CHOSEN','ROOT_RESELECT'])
 for locale in ['ru-RU','en-GB']:
  text=(root/'com_bslmedia/admin/language'/locale/'com_bslmedia.ini').read_text(encoding='utf-8')
  keys=re.findall(r'^(COM_BSLMEDIA_[A-Z_]+)=',text,re.M)

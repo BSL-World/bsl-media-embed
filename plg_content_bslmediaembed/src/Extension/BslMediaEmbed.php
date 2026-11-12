@@ -192,7 +192,7 @@ final class BslMediaEmbed extends CMSPlugin implements SubscriberInterface
         if ($layout === null) return $html;
         $assets = $this->getApplication()->getDocument()->getWebAssetManager();
         if (!$assets->assetExists('style', 'plg_content_bslmediaembed.layout')) {
-            $assets->registerStyle('plg_content_bslmediaembed.layout', Uri::root() . 'media/plg_content_bslmediaembed/layout.css', ['version'=>'0.8.1']);
+            $assets->registerStyle('plg_content_bslmediaembed.layout', Uri::root() . 'media/plg_content_bslmediaembed/layout.css', ['version'=>'0.8.2']);
         }
         $assets->useStyle('plg_content_bslmediaembed.layout');
         // Only enums and bounded integers enter attributes/CSS, never raw shortcode text.

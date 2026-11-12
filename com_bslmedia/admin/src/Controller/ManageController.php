@@ -28,9 +28,10 @@ final class ManageController extends BaseController
     {
         $this->guard('core.admin');
         try{
-            $root=$this->input->post->getString('root','');$limit=$this->input->post->getString('max_upload_value','');$unit=$this->input->post->getString('max_upload_unit','MB');
+            $root=RootBrowser::saveValue(JPATH_ROOT,$this->input->post->getString('root_choice',''),
+                $this->input->post->getInt('root_selected',0)===1,(string)ComponentHelper::getParams('com_bslmedia')->get('root',''));
+            $limit=$this->input->post->getString('max_upload_value','');$unit=$this->input->post->getString('max_upload_unit','MB');
             $bytes=MediaLibrary::parseLimit($limit,$unit);
-            if($root!==''&&MediaStream::resolveRoot($root,JPATH_ROOT)==='')throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $query=$db->getQuery(true)->select($db->quoteName('params'))->from($db->quoteName('#__extensions'))->where($db->quoteName('element').'='.$db->quote('com_bslmedia'))->where($db->quoteName('type').'='.$db->quote('component'));
             $params=new \Joomla\Registry\Registry((string)$db->setQuery($query)->loadResult());

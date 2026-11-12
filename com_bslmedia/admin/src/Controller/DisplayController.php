@@ -19,7 +19,7 @@ final class DisplayController extends BaseController
         $params=ComponentHelper::getParams('com_bslmedia');$root=MediaStream::resolveRoot((string)$params->get('root',''),JPATH_ROOT);
         $folder=$this->input->getString('folder','');
         try{if($root!=='')MediaLibrary::directory($root,$folder);}catch(\RuntimeException $e){$this->app->enqueueMessage(\Joomla\CMS\Language\Text::_($e->getMessage()),'error');$folder='';}
-        $this->app->getDocument()->getWebAssetManager()->registerAndUseScript('com_bslmedia.library',\Joomla\CMS\Uri\Uri::root().'media/com_bslmedia/library.js',['version'=>'0.8.1'],['defer'=>true]);
+        $this->app->getDocument()->getWebAssetManager()->registerAndUseScript('com_bslmedia.library',\Joomla\CMS\Uri\Uri::root().'media/com_bslmedia/library.js',['version'=>'0.8.2'],['defer'=>true]);
         require dirname(__DIR__,2).'/tmpl/library.php';
         return $this;
     }

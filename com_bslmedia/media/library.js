@@ -50,7 +50,11 @@
   const dialog = document.getElementById('bsl-folder-picker');
   if (!dialog) return;
   const choose = document.getElementById('bsl-select-folder'), up = document.getElementById('bsl-up');
-  let relative = '', current = '', selected = '', request = 0;
+  let relative = '', current = '', selected = null, request = 0;
+  function locationLabel(location) {
+    const labels={site:root.dataset.siteLabel,neighbour:root.dataset.neighbourLabel,container:root.dataset.containerLabel};
+    return [labels[location.area],...location.parts].join(' → ');
+  }
   async function load(next,initial='') {
     const seq = ++request;
     choose.disabled = true; up.disabled = true;
@@ -61,12 +65,12 @@
       const response = await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
       const data = await response.json();
       if (!response.ok || data?.error) throw new Error(typeof data?.error==='string'?data.error:root.dataset.browseError);
-      if (!data||typeof data.path!=='string'||typeof data.relative!=='string'||typeof data.value!=='string'||typeof data.boundary!=='string'
+      if (!data||!data.location||!['site','neighbour','container'].includes(data.location.area)||!['site','container'].includes(data.boundaryArea)||!Array.isArray(data.location.parts)||!data.location.parts.every(part=>typeof part==='string')||typeof data.relative!=='string'
           || !Array.isArray(data.folders)||!data.folders.every(folder=>folder&&typeof folder.name==='string'&&typeof folder.relative==='string')) throw new Error(root.dataset.browseError);
       if (seq !== request) return;
-      current = data.path; relative = data.relative; selected = data.value;
+      current = locationLabel(data.location); relative = data.relative; selected = data.relative;
       document.getElementById('bsl-picker-path').textContent = current;
-      document.getElementById('bsl-picker-boundary').textContent = data.boundary;
+      document.getElementById('bsl-picker-boundary').textContent = data.boundaryArea==='site'?root.dataset.siteLabel:root.dataset.containerLabel;
       up.disabled = !relative;
       document.getElementById('bsl-picker-folders').replaceChildren();
       data.folders.forEach(folder => {
@@ -85,13 +89,18 @@
     }
   }
   document.getElementById('bsl-browse').addEventListener('click',() => {
-    relative='';current='';selected='';document.getElementById('bsl-picker-path').textContent='';
+    relative='';current='';selected=null;document.getElementById('bsl-picker-path').textContent='';
     document.getElementById('bsl-picker-boundary').textContent='';document.getElementById('bsl-picker-folders').replaceChildren();
     dialog.showModal();load('','library');
   });
   document.getElementById('bsl-site-home').addEventListener('click',() => load('','site'));
   up.addEventListener('click',() => load(relative.split('/').slice(0,-1).join('/')));
-  choose.addEventListener('click',() => { if(current&&selected){document.getElementById('bsl-root').value=selected;++request;dialog.close();} });
+  choose.addEventListener('click',() => {
+    if(current&&selected!==null){
+      document.getElementById('bsl-root-choice').value=selected;document.getElementById('bsl-root-selected').value='1';
+      document.getElementById('bsl-root-location').textContent=current;++request;dialog.close();
+    }
+  });
   document.getElementById('bsl-close-picker').addEventListener('click',() => {++request;dialog.close();});
   dialog.addEventListener('cancel',() => {++request;});
 })();

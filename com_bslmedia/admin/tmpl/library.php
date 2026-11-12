@@ -4,21 +4,26 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\HTML\HTMLHelper;
 use BSL\Component\Bslmedia\Site\Service\MediaStream;
 use BSL\Component\Bslmedia\Administrator\Service\MediaLibrary;
+use BSL\Component\Bslmedia\Administrator\Service\RootBrowser;
 $e=static fn($s)=>htmlspecialchars((string)$s,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $t=static fn($k)=>Text::_('COM_BSLMEDIA_'.$k);
 $link=static fn($path)=>'index.php?option=com_bslmedia&folder='.rawurlencode($path);
 $token=HTMLHelper::_('form.token');$warning=$t('NO_DESTRUCTIVE');
+$rootChoice=$allowed('core.admin')&&$root!==''?RootBrowser::current(JPATH_ROOT,$root):null;
+$locationLabel=static function($location)use($t){return $t(['site'=>'WITHIN_SITE','neighbour'=>'BESIDE_SITE','container'=>'SITE_CONTAINER'][$location['area']]).($location['parts']===[]?'':' → '.implode(' → ',$location['parts']));};
 $limit=MediaLibrary::limit(['max_upload_mb'=>$params->get('max_upload_mb',64),'max_upload_value'=>$params->get('max_upload_value',''),'max_upload_unit'=>$params->get('max_upload_unit','MB')]);
 $formatSize=static fn($n)=>$n>=1000000000?number_format($n/1000000000,2,'.',' ').' '.$t('UNIT_GB'):($n>=1000000?number_format($n/1000000,2,'.',' ').' '.$t('UNIT_MB'):number_format($n,0,'.',' ').' B');
 ?>
-<div id="bsl-library" data-browse-error="<?= $e($t('BROWSE_ERROR')) ?>" data-copied="<?= $e($t('COPIED')) ?>" data-copy-failed="<?= $e($t('COPY_FAILED')) ?>" data-uploading="<?= $e($t('UPLOADING')) ?>">
+<div id="bsl-library" data-browse-error="<?= $e($t('BROWSE_ERROR')) ?>" data-copied="<?= $e($t('COPIED')) ?>" data-copy-failed="<?= $e($t('COPY_FAILED')) ?>" data-uploading="<?= $e($t('UPLOADING')) ?>" data-site-label="<?= $e($t('WITHIN_SITE')) ?>" data-neighbour-label="<?= $e($t('BESIDE_SITE')) ?>" data-container-label="<?= $e($t('SITE_CONTAINER')) ?>">
 <?php if($allowed('core.admin')): ?>
 <details id="bsl-settings" class="card p-3 mb-3" <?= $root===''?'open':'' ?>>
 <summary class="h3"><?= $e($t('LIBRARY_SETTINGS')) ?></summary>
 <form method="post" action="index.php?option=com_bslmedia" class="mt-3">
 <input type="hidden" name="task" value="manage.save"><?= $token ?>
-<label for="bsl-root"><?= $e($t('ROOT')) ?></label>
-<div class="input-group"><input class="form-control" id="bsl-root" name="root" value="<?= $e($params->get('root','')) ?>" aria-describedby="bsl-root-help">
+<p id="bsl-root-label"><?= $e($t('ROOT')) ?></p>
+<input id="bsl-root-choice" type="hidden" name="root_choice" value="<?= $e($rootChoice['relative']??'') ?>">
+<input id="bsl-root-selected" type="hidden" name="root_selected" value="<?= $rootChoice===null?'0':'1' ?>">
+<div class="d-flex flex-wrap align-items-center gap-2"><strong id="bsl-root-location" aria-labelledby="bsl-root-label"><?= $e($rootChoice!==null?$locationLabel($rootChoice['location']):$t($root===''?'ROOT_NOT_CHOSEN':'ROOT_RESELECT')) ?></strong>
 <button type="button" id="bsl-browse" class="btn btn-secondary" title="<?= $e($warning) ?>"><?= $e($t('BROWSE')) ?></button></div>
 <p id="bsl-root-help"><?= $e($t('ROOT_HELP')) ?></p>
 <label for="bsl-limit"><?= $e($t('UPLOAD_LIMIT')) ?></label>

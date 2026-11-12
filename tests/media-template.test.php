@@ -4,15 +4,17 @@ namespace Joomla\CMS\Language {class Text{public static function _($s){return $s
 namespace Joomla\CMS\HTML {class HTMLHelper{public static function _($s,...$args){return $s==='date'?$args[0]:'<input type="hidden" name="csrf" value="1">';}}}
 namespace {
 define('_JEXEC',1);
+define('JPATH_ROOT',__DIR__);
 require __DIR__.'/../com_bslmedia/site/src/Service/MediaStream.php';
 require __DIR__.'/../com_bslmedia/admin/src/Service/MediaLibrary.php';
+require __DIR__.'/../com_bslmedia/admin/src/Service/RootBrowser.php';
 $params=new class{public function get($key,$default=null){return $key==='root'?'../media':$default;}};
 $root='';$folder='';$count=0;
 foreach([true,false] as $admin){
  $allowed=fn($action)=>$admin||$action==='media.upload';
  ob_start();require __DIR__.'/../com_bslmedia/admin/tmpl/library.php';$html=ob_get_clean();
- foreach(['id="bsl-root"','id="bsl-folder-picker"','manage.save'] as $needle){if(str_contains($html,$needle)!==$admin)throw new RuntimeException('Settings ACL rendering');$count++;}
- if(str_contains($html,'../media')!==$admin)throw new RuntimeException('Private path visible to unconfigured uploader');
+ foreach(['id="bsl-root-choice"','id="bsl-root-location"','id="bsl-folder-picker"','manage.save'] as $needle){if(str_contains($html,$needle)!==$admin)throw new RuntimeException('Settings ACL rendering');$count++;}
+ if(str_contains($html,'../media')||str_contains($html,'name="root"'))throw new RuntimeException('Manual root path must not appear');
 }
 // Render a configured uploader view with nested media; no server/site bootstrap.
 $root=__DIR__.'/../dist/template-unit-'.getmypid();mkdir($root,0700,true);mkdir($root.'/Album');file_put_contents($root.'/Album/song.opus','fixture');
@@ -37,6 +39,8 @@ try{
  if(!str_contains($nested,'folder='))throw new RuntimeException('Missing breadcrumb navigation');$count++;
  $allowed=fn($action)=>true;ob_start();require __DIR__.'/../com_bslmedia/admin/tmpl/library.php';$adminHtml=ob_get_clean();
  if(substr_count($adminHtml,'<dialog')!==1||!str_contains($adminHtml,'id="bsl-settings"'))throw new RuntimeException('Only admin root selection has a dialog');$count++;
+ if(str_contains($adminHtml,realpath($root))||str_contains($adminHtml,'name="root"')||str_contains($adminHtml,'id="bsl-root"'))throw new RuntimeException('No absolute/manual root field is permitted');$count++;
+ if(!str_contains($adminHtml,'COM_BSLMEDIA_BESIDE_SITE')||!str_contains($adminHtml,'name="root_selected" value="1"'))throw new RuntimeException('Existing root needs human location and valid chooser state');$count++;
  echo "PASS $count template checks: unified folder view, identical upload/create targets, settings ACL and no duplicate pickers\n";
 }finally{unlink($root.'/Album/song.opus');unlink($root.'/sample.mp3');unlink($root.'/sample.mp4');rmdir($root.'/Album');rmdir($root);}
 }

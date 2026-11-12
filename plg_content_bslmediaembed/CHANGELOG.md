@@ -2,6 +2,12 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.8.2] - unpublished development candidate, 2026-11-12
+
+- Remove manual/full server-path entry from the media settings page; show a human location and a folder chooser only.
+- Root chooser responses contain logical locations, not filesystem paths. Revalidate the boundary-relative selection on settings save.
+- Recognize existing in-boundary absolute settings without displaying them; normalize them to portable relative values when explicitly saved.
+
 ## [0.8.1] - unpublished development candidate, 2026-11-12
 
 - Constrain the root folder chooser to one canonical boundary containing the Joomla site, independently of the current media root.
