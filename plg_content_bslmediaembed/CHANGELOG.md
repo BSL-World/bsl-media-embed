@@ -2,6 +2,19 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.7.0] - unpublished development candidate, 2026-11-12
+
+- One media-library folder view with breadcrumbs, current-folder files/search/sorting, Upload here and inline Create subfolder.
+- Removed the separate upload destination dialog and folder-filter dropdown. Root location and size settings are collapsible and admin-only.
+- Replaced the two-level product restriction with shared technical limits: 32 levels and 20,000 scanned entries, without following symlink directories.
+- Preserve existing keys; discover deeper files consistently in the component, editor and streaming endpoint. Incomplete catalogues are explicitly reported.
+
+## [0.6.0] - unpublished development candidate, 2026-11-11
+
+- Existing editor button offers local file search, folder/type filters and bounded pages alongside Yandex Music / YouTube.
+- Authenticated read-only catalogue and saved-cursor insertion; consistent versions, manifest dates and script-cache versioning.
+- On 2026-11-12 upgrade/IDs/settings were verified on supplied Joomla 6. Alexander confirmed a new article with two shortcodes, frontend output and component settings; separate per-format audible/seek tests were not reported.
+
 ## [0.5.2] - unpublished development candidate, 2026-11-11
 
 - Clear main media folder/upload destination labels and help.

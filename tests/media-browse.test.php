@@ -25,10 +25,10 @@ try{
  $r=browse(['media.upload'],['mode'=>'destination','scope'=>'site']);same($r['folders'],[['relative'=>'Section','name'=>'Section']]);same($r['canCreate'],false);
  same(str_contains($r['path'],realpath($dir)),false);
  $r=browse(['media.create'],['mode'=>'destination','relative'=>'Section']);same($r['canCreate'],true);
- $r=browse(['core.admin'],['mode'=>'destination','relative'=>'Section/Subsection']);same($r['canCreate'],false);same($r['folders'],[]);
+ $r=browse(['core.admin'],['mode'=>'destination','relative'=>'Section/Subsection']);same($r['canCreate'],true);same($r['folders'],[]);
  foreach(['../site','Section/Subsection/Third'] as $path){$r=browse(['media.upload'],['mode'=>'destination','relative'=>$path]);same(isset($r['error']),true);}
  try{browse(['media.upload'],['mode'=>'root']);throw new RuntimeException('Uploader got root picker');}catch(RuntimeException $e){same($e->getCode(),403);}
  $r=browse(['core.admin'],['mode'=>'root','scope'=>'site']);same(count($r['folders']),2);
- echo "PASS $count bounded folder picker checks: Publisher confinement, root ACL, depth, relative paths\n";
+ echo "PASS $count bounded folder picker checks: Publisher confinement, root ACL, deeper creation and relative paths\n";
 }finally{rmdir($dir.'/media/Section/Subsection');rmdir($dir.'/media/Section');rmdir($dir.'/media');rmdir($dir.'/site');rmdir($dir);}
 }

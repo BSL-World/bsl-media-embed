@@ -41,10 +41,10 @@ export function createLibraryPicker({url, text, select, status}) {
         row.setAttribute('aria-pressed','false');
         row.addEventListener('click',()=>{
           for(const button of list.querySelectorAll('button')){button.setAttribute('aria-pressed','false');button.style.outline='';}
-          row.setAttribute('aria-pressed','true');row.style.outline='2px solid currentColor'; select(item);status('');
+          row.setAttribute('aria-pressed','true');row.style.outline='2px solid currentColor'; select(item);status(data.truncated?text('LIMIT'):'');
         });list.append(row);
       }
-      status(data.items.length?'':text('EMPTY'));
+      status(data.truncated?text('LIMIT'):(data.items.length?'':text('EMPTY')));
     } catch(error) {
       if(stopped||request!==serial||error.name==='AbortError')return;
       list.replaceChildren();select(null);status(text('LOAD_ERROR'));

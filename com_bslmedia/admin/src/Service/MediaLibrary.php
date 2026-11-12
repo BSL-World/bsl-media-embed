@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace BSL\Component\Bslmedia\Administrator\Service;
+use BSL\Component\Bslmedia\Site\Service\MediaStream;
 
 /** Filesystem operations only. Controllers enforce Joomla ACL/CSRF and uploaded-file provenance. */
 final class MediaLibrary
@@ -31,13 +32,13 @@ final class MediaLibrary
             && !preg_match('~^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)~i',$name);
     }
 
-    public static function directory(string $root, string $relative='', int $maxDepth=2): string
+    public static function directory(string $root, string $relative='', int $maxDepth=MediaStream::MAX_DEPTH): string
     {
         $base=realpath($root);
         if ($root==='' || $base===false || !is_dir($base)) throw new \RuntimeException('COM_BSLMEDIA_UNCONFIGURED');
         if ($relative==='') return $base;
         $parts=explode('/',$relative);
-        if (count($parts)>$maxDepth) throw new \RuntimeException('COM_BSLMEDIA_DEPTH');
+        if (count($parts)>min($maxDepth,MediaStream::MAX_DEPTH)) throw new \RuntimeException('COM_BSLMEDIA_DEPTH');
         $path=$base;
         foreach($parts as $part){
             if (!self::name($part)) throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
@@ -54,23 +55,27 @@ final class MediaLibrary
         return PHP_OS_FAMILY==='Windows' ? strncasecmp($path,$prefix,strlen($prefix))===0 : str_starts_with($path,$prefix);
     }
 
-    public static function folders(string $root,string $relative='',int $maxDepth=2):array
+    public static function folders(string $root,string $relative='',int $maxDepth=MediaStream::MAX_DEPTH):array
     {
         $dir=self::directory($root,$relative,$maxDepth);$result=[];
         if ($relative!=='' && count(explode('/',$relative)) >= $maxDepth) return [];
-        foreach(@scandir($dir) ?: [] as $name){
+        $count=0;
+        try{$iterator=new \FilesystemIterator($dir,\FilesystemIterator::SKIP_DOTS);}catch(\UnexpectedValueException){throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');}
+        foreach($iterator as $entry){
+            if(++$count>MediaStream::MAX_ENTRIES)throw new \RuntimeException('COM_BSLMEDIA_SCAN_LIMIT');
+            $name=$entry->getFilename();
             if (!self::name($name)) continue;
             $rel=($relative===''?'':$relative.'/').$name;
             try {self::directory($root,$rel,$maxDepth);$result[]=$rel;}catch(\RuntimeException){}
         }
-        return $result;
+        natcasesort($result);return array_values($result);
     }
 
     public static function createFolder(string $root,string $parent,string $name):void
     {
         if (!self::name($name)) throw new \RuntimeException('COM_BSLMEDIA_BAD_NAME');
         $depth=$parent===''?0:count(explode('/',$parent));
-        if ($depth>=2) throw new \RuntimeException('COM_BSLMEDIA_DEPTH');
+        if ($depth>=MediaStream::MAX_DEPTH) throw new \RuntimeException('COM_BSLMEDIA_DEPTH');
         $dir=self::directory($root,$parent);$target=$dir.DIRECTORY_SEPARATOR.$name;
         if (file_exists($target)||is_link($target)) throw new \RuntimeException('COM_BSLMEDIA_EXISTS');
         if (!@mkdir($target,0750)) throw new \RuntimeException('COM_BSLMEDIA_WRITE_FAILED');

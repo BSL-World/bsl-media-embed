@@ -46,6 +46,7 @@ final class ManageController extends BaseController
         try{
             $name=$this->input->post->getString('new_folder','');MediaLibrary::createFolder($this->root(),$folder,$name);
             if($ajax){$this->json(['relative'=>($folder===''?'':$folder.'/').$name]);return;}
+            $folder=($folder===''?'':$folder.'/').$name;
             $this->app->enqueueMessage(Text::_('COM_BSLMEDIA_CREATED'));
         }catch(\RuntimeException $e){
             if($ajax){$this->json(['error'=>Text::_($e->getMessage())],400);return;}
@@ -90,10 +91,10 @@ final class ManageController extends BaseController
             $anchor=($destination||$scope==='media')?$this->root():dirname(JPATH_ROOT);
             // Never turn the picker into a whole-drive or filesystem-root explorer.
             if($anchor===''||dirname($anchor)===$anchor)throw new \RuntimeException('COM_BSLMEDIA_BAD_PATH');
-            $depth=$destination?2:6;
+            $depth=MediaStream::MAX_DEPTH;
             $relative=$this->input->getString('relative','');$dir=MediaLibrary::directory($anchor,$relative,$depth);
             $folders=MediaLibrary::folders($anchor,$relative,$depth);
-            $result=['path'=>$destination?(Text::_('COM_BSLMEDIA_ROOT_FOLDER').($relative===''?'':' / '.$relative)):$dir,'relative'=>$relative,'canCreate'=>$destination&&$this->allowed('media.create')&&($relative===''||count(explode('/',$relative))<2),'folders'=>array_map(static fn($r)=>['relative'=>$r,'name'=>basename($r)],$folders)];
+            $result=['path'=>$destination?(Text::_('COM_BSLMEDIA_ROOT_FOLDER').($relative===''?'':' / '.$relative)):$dir,'relative'=>$relative,'canCreate'=>$destination&&$this->allowed('media.create')&&($relative===''||count(explode('/',$relative))<MediaStream::MAX_DEPTH),'folders'=>array_map(static fn($r)=>['relative'=>$r,'name'=>basename($r)],$folders)];
             $this->json($result);
         }catch(\RuntimeException $e){$this->json(['error'=>Text::_($e->getMessage())],400);}
     }

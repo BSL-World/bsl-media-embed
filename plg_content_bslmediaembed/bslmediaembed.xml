@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="plugin" group="content" method="upgrade">
     <name>PLG_CONTENT_BSLMEDIAEMBED</name>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
     <author>Vasilyev Alexander</author>
     <authorEmail>soft@bsl-world.ru</authorEmail>
     <authorUrl>https://bsl-world.ru</authorUrl>
-    <creationDate>2026-11-11</creationDate>
+    <creationDate>2026-11-12</creationDate>
     <copyright>Copyright (C) 2026 Vasilyev Alexander (BSL-World.ru).</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <description>PLG_CONTENT_BSLMEDIAEMBED_DESCRIPTION</description>

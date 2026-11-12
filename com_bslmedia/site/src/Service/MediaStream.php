@@ -5,6 +5,8 @@ namespace BSL\Component\Bslmedia\Site\Service;
 /** No Joomla bootstrap: the same request planner is used by the HTTP controller and unit tests. */
 final class MediaStream
 {
+    public const MAX_DEPTH = 32;
+    public const MAX_ENTRIES = 20000;
     public static function resolveRoot(string $root, string $siteRoot): string
     {
         if ($root === '' || str_contains($root, "\0") || str_contains($root, '%') || str_contains($root, '://')) return '';
@@ -14,30 +16,48 @@ final class MediaStream
         return $resolved !== false && is_dir($resolved) && dirname($resolved)!==$resolved ? $resolved : '';
     }
 
-    /** Public media entries, at most two subdirectory levels. No symlink directory traversal. */
+    /** Public media entries. Technical limits bound recursion and scan work. */
     public static function files(string $root):array
     {
-        $base=$root===''?false:realpath($root);if($base===false||!is_dir($base))return [];
-        $files=[];
-        $walk=function(string $dir,string $prefix,int $depth)use(&$walk,&$files,$base):void{
-            foreach(@scandir($dir) ?: [] as $name){
+        return self::scan($root)['files'];
+    }
+
+    public static function scan(string $root,int $budget=self::MAX_ENTRIES):array
+    {
+        $base=$root===''?false:realpath($root);if($base===false||!is_dir($base))return ['files'=>[],'truncated'=>false];
+        $budget=max(1,min($budget,self::MAX_ENTRIES));$files=[];$visited=[];$count=0;$truncated=false;
+        $walk=function(string $dir,string $prefix,int $depth)use(&$walk,&$files,&$visited,&$count,&$truncated,$budget,$base):void{
+            $identity=PHP_OS_FAMILY==='Windows'?strtolower($dir):$dir;
+            if(isset($visited[$identity]))return;$visited[$identity]=true;
+            try{$iterator=new \FilesystemIterator($dir,\FilesystemIterator::SKIP_DOTS);}catch(\UnexpectedValueException){$truncated=true;return;}
+            foreach($iterator as $entry){
+                if(++$count>$budget){$truncated=true;return;}
+                $name=$entry->getFilename();
                 if(str_starts_with($name,'.')||str_contains($name,'..')||preg_match('~[\\\\/\x00-\x1f\x7f:%]~',$name))continue;
                 $path=$dir.DIRECTORY_SEPARATOR.$name;$resolved=realpath($path);
                 if($resolved===false)continue;
                 $inside=rtrim($base,'/\\').DIRECTORY_SEPARATOR;
                 if(PHP_OS_FAMILY==='Windows' ? strncasecmp($resolved,$inside,strlen($inside))!==0 : !str_starts_with($resolved,$inside))continue;
                 $relative=$prefix.$name;
-                if(is_dir($path)){if($depth<2&&!is_link($path))$walk($resolved,$relative.'/',$depth+1);continue;}
+                if(is_dir($path)){
+                    if(!is_link($path)){if($depth<self::MAX_DEPTH)$walk($resolved,$relative.'/',$depth+1);else $truncated=true;}
+                    if($count>$budget)return;continue;
+                }
                 if(is_file($path)&&is_readable($path)&&preg_match('~\.(mp3|mp4|opus)$~iD',$name))$files[]=$relative;
             }
         };
-        $walk($base,'',0);sort($files,SORT_STRING);return $files;
+        $walk($base,'',0);sort($files,SORT_STRING);return ['files'=>$files,'truncated'=>$truncated];
     }
 
     public static function catalog(string $root): array
     {
+        return self::catalogFromFiles(self::files($root));
+    }
+
+    public static function catalogFromFiles(array $files): array
+    {
         $map=[];
-        foreach (self::files($root) as $name) {
+        foreach ($files as $name) {
             $key=preg_match('~^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$~D',$name) ? $name : 'media-'.substr(hash('sha256',$name),0,32);
             if (isset($map[$key]) && $map[$key]!==$name) { $map[$key]=null; continue; }
             $map[$key]=$name;
@@ -61,14 +81,16 @@ final class MediaStream
         if (!preg_match('~^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$~D', $key) || str_contains($key, '..')) return ['status'=>400,'headers'=>[]];
         if (!preg_match('~^(?:/|[A-Za-z]:[\\\\/])~', $root) || !($base = realpath($root)) || !is_dir($base)) return ['status'=>503,'headers'=>[]];
         // Keep saved legacy aliases, but new installations require only a folder.
-        $catalog=array_key_exists($key,$map) ? $map : self::catalog($base);
-        if (!array_key_exists($key, $catalog)) return ['status'=>404,'headers'=>[]];
+        $truncated=false;
+        if(array_key_exists($key,$map))$catalog=$map;
+        else{$scan=self::scan($base);$catalog=self::catalogFromFiles($scan['files']);$truncated=$scan['truncated'];}
+        if (!array_key_exists($key, $catalog)) return ['status'=>$truncated?503:404,'headers'=>[]];
         $relative = $catalog[$key];
         if ($relative === null) return ['status'=>409,'headers'=>[]];
         if (!is_string($relative) || preg_match('~[\\\\\x00-\x1f\x7f:%]~',$relative)
             || str_starts_with($relative,'/') || str_starts_with($relative,'.')
             || !preg_match('~\.(mp3|mp4|opus)$~iD', $relative, $match)
-            || str_contains($relative, '..') || str_contains($relative, '//') || substr_count($relative,'/')>2) return ['status'=>403,'headers'=>[]];
+            || str_contains($relative, '..') || str_contains($relative, '//') || substr_count($relative,'/')>self::MAX_DEPTH) return ['status'=>403,'headers'=>[]];
         $file = realpath($base . DIRECTORY_SEPARATOR . $relative);
         if ($file === false) return ['status'=>404,'headers'=>[]];
         $prefix = rtrim($base, '/\\') . DIRECTORY_SEPARATOR;

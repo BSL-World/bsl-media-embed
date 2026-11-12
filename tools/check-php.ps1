@@ -14,6 +14,8 @@ foreach ($phpVersion in @('8.1', '8.2', '8.4')) {
     if ($LASTEXITCODE -ne 0) { throw "Media streaming failed: PHP $phpVersion" }
     & $phpPath tests/media-library.test.php
     if ($LASTEXITCODE -ne 0) { throw "Media library failed: PHP $phpVersion" }
+    & $phpPath tests/media-depth.test.php
+    if ($LASTEXITCODE -ne 0) { throw "Media depth failed: PHP $phpVersion" }
     & $phpPath tests/media-acl.test.php
     if ($LASTEXITCODE -ne 0) { throw "Media ACL failed: PHP $phpVersion" }
     & $phpPath tests/media-template.test.php

@@ -38,7 +38,7 @@ with tempfile.TemporaryDirectory() as temp:
     with ZipFile(io.BytesIO(first)) as package:
         assert set(package.namelist()) == {'pkg_bslmediaembed.xml', 'packages/com_bslmedia.zip', 'packages/plg_content_bslmediaembed.zip', 'packages/plg_editors-xtd_bslmedia.zip'}
         manifest = ET.fromstring(package.read('pkg_bslmediaembed.xml'))
-        assert manifest.findtext('creationDate') == '2026-11-11'
+        assert manifest.findtext('creationDate') == ET.parse(root / 'package/pkg_bslmediaembed.xml').getroot().findtext('creationDate')
         for child in manifest.find('files'):
             with ZipFile(io.BytesIO(package.read('packages/' + child.text))) as plugin:
                 manifest_name = 'bslmediaembed.xml' if child.attrib.get('group') == 'content' else 'bslmedia.xml'

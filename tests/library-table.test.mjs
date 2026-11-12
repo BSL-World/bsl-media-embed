@@ -13,12 +13,12 @@ function run(){
  const clicks={},headers={};
  const buttons=['name','size','modified'].map(key=>({dataset:{sort:key},addEventListener:(event,fn)=>{clicks[key]=fn;},closest:()=>({setAttribute:(name,value)=>{headers[key]=value;}})}));
  const table={querySelector:()=>body,querySelectorAll:()=>buttons};
- let change;const options=[];const filter={value:'*',append:option=>options.push(option),addEventListener:(event,fn)=>{change=fn;}};
- const destination={value:'original-upload-destination'};const controls={hidden:true};
+ let change;const search={value:'',addEventListener:(event,fn)=>{change=fn;}};
+ const destination={value:'Section'};const empty={hidden:true};
  const root={querySelectorAll:()=>[]};
- const document={documentElement:{lang:'en'},getElementById:id=>({'bsl-library':root,'bsl-media-table':table,'bsl-folder-filter':filter,'bsl-table-controls':controls,'bsl-destination':destination}[id]??null),createElement:()=>({})};
+ const document={documentElement:{lang:'en'},getElementById:id=>({'bsl-library':root,'bsl-media-table':table,'bsl-file-search':search,'bsl-empty':empty,'bsl-destination':destination}[id]??null),createElement:()=>({})};
  vm.runInNewContext(source,{document,Intl});
- return {body,clicks,headers,options,controls,destination,select(value){filter.value=value==='*'?'*':`folder:${value}`;change();}};
+ return {body,clicks,headers,empty,destination,search(value){search.value=value;change();}};
 }
 test('sorts names naturally, sizes numerically, and dates by timestamp in both directions',()=>{
  const ui=run();assert.deepEqual(ui.body.rows.map(r=>r.dataset.name),['Clip.mp4','File2.mp3','File10.mp3']);
@@ -27,12 +27,11 @@ test('sorts names naturally, sizes numerically, and dates by timestamp in both d
  ui.clicks.modified();assert.deepEqual(ui.body.rows.map(r=>r.dataset.modified),['3','20','100']);
  ui.clicks.modified();assert.deepEqual(ui.body.rows.map(r=>r.dataset.modified),['100','20','3']);
 });
-test('folder filter does not change upload destination or break sorting/copy row identity',()=>{
- const ui=run();assert.equal(ui.controls.hidden,false);
- assert.deepEqual(ui.options.map(o=>o.textContent),['Section','Section/Subsection']);
- ui.select('Section');assert.deepEqual(ui.body.rows.filter(r=>!r.hidden).map(r=>r.dataset.name),['File2.mp3']);
+test('search filters the open folder without changing upload target or losing sort/row identity',()=>{
+ const ui=run();
+ ui.search('file2');assert.deepEqual(ui.body.rows.filter(r=>!r.hidden).map(r=>r.dataset.name),['File2.mp3']);
  ui.clicks.size();assert.equal(ui.body.rows.filter(r=>!r.hidden)[0].dataset.name,'File2.mp3');
- ui.select('');assert.deepEqual(ui.body.rows.filter(r=>!r.hidden).map(r=>r.dataset.name),['File10.mp3']);
- ui.select('*');assert.equal(ui.body.rows.filter(r=>!r.hidden).length,3);
- assert.equal(ui.destination.value,'original-upload-destination');
+ ui.search('missing');assert.equal(ui.empty.hidden,false);
+ ui.search('');assert.equal(ui.body.rows.filter(r=>!r.hidden).length,3);assert.equal(ui.empty.hidden,true);
+ assert.equal(ui.destination.value,'Section');
 });

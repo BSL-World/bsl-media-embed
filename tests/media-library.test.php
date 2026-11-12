@@ -18,7 +18,10 @@ try{
  expect(Library::name('Музыка'),true);
  Library::createFolder($dir,'','Music');Library::createFolder($dir,'Music','Album');
  expect(Library::folders($dir),['Music']);expect(Library::folders($dir,'Music'),['Music/Album']);
- denied(fn()=>Library::createFolder($dir,'Music/Album','Third'),'COM_BSLMEDIA_DEPTH');
+ Library::createFolder($dir,'Music/Album','Third');
+ expect(Library::directory($dir,'Music/Album/Third'),realpath($dir.'/Music/Album/Third'));
+ denied(fn()=>Library::directory($dir,implode('/',array_fill(0,33,'d'))),'COM_BSLMEDIA_DEPTH');
+ denied(fn()=>Library::createFolder($dir,implode('/',array_fill(0,32,'d')),'extra'),'COM_BSLMEDIA_DEPTH');
  denied(fn()=>Library::directory($dir,'../outside'),'COM_BSLMEDIA_BAD_PATH');
  denied(fn()=>Library::createFolder($dir,'','Music'),'COM_BSLMEDIA_EXISTS');
  file_put_contents($dir.'/bad.mp3','<?php echo "bad";');
@@ -35,9 +38,12 @@ try{
  expect(file_get_contents($dir.'/Music/Album/клип.mp4'),$mp4);expect(glob($dir.'/Music/Album/.bsl-upload-*'),[]);
  $catalog=Stream::catalog($dir);$key=array_search('Music/Album/клип.mp4',$catalog,true);expect(is_string($key),true);
  $r=Stream::open($dir,[],$key,'HEAD',null);expect($r['status'],200);expect($r['headers']['Content-Length'],(string)strlen($mp4));fclose($r['handle']);
- mkdir($dir.'/Music/Album/Third');file_put_contents($dir.'/Music/Album/Third/hidden.mp3','hidden');
- expect(in_array('Music/Album/Third/hidden.mp3',Stream::files($dir),true),false);
- denied(fn()=>Library::directory($dir,'Music/Album/Third'),'COM_BSLMEDIA_DEPTH');
+ file_put_contents($dir.'/Music/Album/Third/deep.mp3','deep');
+ expect(in_array('Music/Album/Third/deep.mp3',Stream::files($dir),true),true);
+ $deepKey='media-'.substr(hash('sha256','Music/Album/Third/deep.mp3'),0,32);
+ $r=Stream::open($dir,[],$deepKey,'GET','bytes=1-2');expect($r['status'],206);ob_start();Stream::emitBody($r);expect(ob_get_clean(),'ee');
+ denied(fn()=>Library::directory($dir,'Music/Album/Third',2),'COM_BSLMEDIA_DEPTH');
+ expect(Stream::scan($dir,2)['truncated'],true);
  foreach(['delete','rename','move','overwrite'] as $method)expect(method_exists(Library::class,$method),false);
  echo "PASS $count media library assertions: depth, traversal, type, no overwrite, Unicode, delivery\n";
 }finally{

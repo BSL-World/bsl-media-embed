@@ -21,7 +21,8 @@ final class EditorLibrary
     {
         $items=[]; $folders=[]; $seen=[];
         $query=mb_substr(trim($query),0,200);
-        foreach (MediaStream::catalog($root) as $key=>$relative) {
+        $scan=MediaStream::scan($root);
+        foreach (MediaStream::catalogFromFiles($scan['files']) as $key=>$relative) {
             if ($relative===null || isset($seen[$relative])) continue;
             $seen[$relative]=true;
             $dir=dirname($relative); if ($dir==='.') $dir='';
@@ -35,6 +36,6 @@ final class EditorLibrary
         usort($items,fn($a,$b)=>strnatcasecmp($a['folder'].'/'.$a['name'],$b['folder'].'/'.$b['name']));
         $total=count($items); $pages=max(1,(int)ceil($total/30)); $page=max(1,min($page,$pages));
         $folders=array_keys($folders); natcasesort($folders);
-        return ['items'=>array_slice($items,($page-1)*30,30),'total'=>$total,'page'=>$page,'pages'=>$pages,'folders'=>array_values($folders)];
+        return ['items'=>array_slice($items,($page-1)*30,30),'total'=>$total,'page'=>$page,'pages'=>$pages,'folders'=>array_values($folders),'truncated'=>$scan['truncated']];
     }
 }
