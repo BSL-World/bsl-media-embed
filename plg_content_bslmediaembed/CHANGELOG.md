@@ -2,6 +2,10 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.8.3] - unpublished development candidate, 2026-11-12
+
+- Remove the create-folder disclosure container's extra border/padding/background and use the same primary button styling as Upload files here.
+
 ## [0.8.2] - unpublished development candidate, 2026-11-12
 
 - Remove manual/full server-path entry from the media settings page; show a human location and a folder chooser only.

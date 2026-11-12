@@ -55,7 +55,7 @@ $subfolders=[];$folderError='';try{$subfolders=MediaLibrary::folders($root,$fold
 <?php endif ?>
 <?php if($allowed('media.create')): ?>
 <?php if($folder===''||count(explode('/',$folder))<MediaStream::MAX_DEPTH): ?>
-<details id="bsl-create-panel"><summary class="btn btn-secondary" title="<?= $e($warning) ?>"><?= $e($t('CREATE_FOLDER')) ?></summary>
+<details id="bsl-create-panel" class="border-0 p-0 m-0 bg-transparent shadow-none"><summary class="btn btn-primary" title="<?= $e($warning) ?>"><?= $e($t('CREATE_FOLDER')) ?></summary>
 <form id="bsl-create-form" method="post" action="index.php?option=com_bslmedia" class="mt-2">
 <input type="hidden" name="task" value="manage.create"><input type="hidden" name="folder" value="<?= $e($folder) ?>"><?= $token ?>
 <label for="bsl-new-folder"><?= $e($t('NEW_FOLDER')) ?></label><input class="form-control" id="bsl-new-folder" name="new_folder" required maxlength="100">
