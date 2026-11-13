@@ -5,6 +5,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use BSL\Component\Bslmedia\Site\Service\MediaStream;
 use BSL\Component\Bslmedia\Administrator\Service\MediaLibrary;
 use BSL\Component\Bslmedia\Administrator\Service\RootBrowser;
+use BSL\Component\Bslmedia\Administrator\Service\UploadLimits;
 $e=static fn($s)=>htmlspecialchars((string)$s,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $t=static fn($k)=>Text::_('COM_BSLMEDIA_'.$k);
 $link=static fn($path)=>'index.php?option=com_bslmedia&folder='.rawurlencode($path);
@@ -12,9 +13,13 @@ $token=HTMLHelper::_('form.token');$warning=$t('NO_DESTRUCTIVE');
 $rootChoice=$allowed('core.admin')&&$root!==''?RootBrowser::current(JPATH_ROOT,$root):null;
 $locationLabel=static function($location)use($t){return $t(['site'=>'WITHIN_SITE','neighbour'=>'BESIDE_SITE','container'=>'SITE_CONTAINER'][$location['area']]).($location['parts']===[]?'':' → '.implode(' → ',$location['parts']));};
 $limit=MediaLibrary::limit(['max_upload_mb'=>$params->get('max_upload_mb',64),'max_upload_value'=>$params->get('max_upload_value',''),'max_upload_unit'=>$params->get('max_upload_unit','MB')]);
+$uploadPolicy=UploadLimits::runtime($limit['bytes']);
+$uploadMessages=['file'=>$t('UPLOAD_FILE_LIMIT'),'post'=>$t('UPLOAD_REQUEST_LIMIT'),'count'=>$t('UPLOAD_COUNT_LIMIT'),
+    'invalid'=>$t('UPLOAD_INVALID_FILE'),'empty'=>$t('UPLOAD_EMPTY'),'disabled'=>$t('UPLOAD_DISABLED'),'config'=>$t('UPLOAD_CONFIG_ERROR'),
+    'component'=>$t('LIMIT_COMPONENT'),'upload'=>$t('LIMIT_UPLOAD')];
 $formatSize=static fn($n)=>$n>=1000000000?number_format($n/1000000000,2,'.',' ').' '.$t('UNIT_GB'):($n>=1000000?number_format($n/1000000,2,'.',' ').' '.$t('UNIT_MB'):number_format($n,0,'.',' ').' B');
 ?>
-<div id="bsl-library" data-browse-error="<?= $e($t('BROWSE_ERROR')) ?>" data-copied="<?= $e($t('COPIED')) ?>" data-copy-failed="<?= $e($t('COPY_FAILED')) ?>" data-uploading="<?= $e($t('UPLOADING')) ?>" data-site-label="<?= $e($t('WITHIN_SITE')) ?>" data-neighbour-label="<?= $e($t('BESIDE_SITE')) ?>" data-container-label="<?= $e($t('SITE_CONTAINER')) ?>">
+<div id="bsl-library" data-browse-error="<?= $e($t('BROWSE_ERROR')) ?>" data-copied="<?= $e($t('COPIED')) ?>" data-copy-failed="<?= $e($t('COPY_FAILED')) ?>" data-uploading="<?= $e($t('UPLOADING')) ?>" data-site-label="<?= $e($t('WITHIN_SITE')) ?>" data-neighbour-label="<?= $e($t('BESIDE_SITE')) ?>" data-container-label="<?= $e($t('SITE_CONTAINER')) ?>" data-upload-policy="<?= $e(json_encode($uploadPolicy)) ?>" data-upload-messages="<?= $e(json_encode($uploadMessages,JSON_UNESCAPED_UNICODE)) ?>" data-upload-unavailable="<?= $e($t('UPLOAD_CHECK_UNAVAILABLE')) ?>">
 <?php if($allowed('core.admin')): ?>
 <details id="bsl-settings" class="card p-3 mb-3" <?= $root===''?'open':'' ?>>
 <summary class="h3"><?= $e($t('LIBRARY_SETTINGS')) ?></summary>
@@ -47,7 +52,7 @@ $subfolders=[];$folderError='';try{$subfolders=MediaLibrary::folders($root,$fold
 <?php if($folderError!==''): ?><p class="alert alert-warning"><?= $e($folderError) ?></p><?php endif ?>
 <div class="d-flex flex-wrap gap-3 align-items-start mb-2">
 <?php if($allowed('media.upload')): ?>
-<form id="bsl-upload-form" method="post" action="index.php?option=com_bslmedia" enctype="multipart/form-data">
+<form id="bsl-upload-form" method="post" action="<?= $e($link($folder).'&task=manage.upload') ?>" enctype="multipart/form-data">
 <input type="hidden" name="task" value="manage.upload"><input id="bsl-destination" type="hidden" name="folder" value="<?= $e($folder) ?>"><?= $token ?>
 <input id="bsl-files" type="file" name="media[]" multiple accept=".mp3,.mp4,.opus" hidden><input id="bsl-selected-count" type="hidden" name="selected_count" value="0">
 <button id="bsl-upload-trigger" type="button" class="btn btn-primary" disabled title="<?= $e($warning) ?>"><?= $e($t('UPLOAD_HERE')) ?></button>
@@ -62,7 +67,14 @@ $subfolders=[];$folderError='';try{$subfolders=MediaLibrary::folders($root,$fold
 <button type="submit" class="btn btn-primary mt-2"><?= $e($t('CREATE_FOLDER')) ?></button></form></details>
 <?php else: ?><p><?= $e($t('DEPTH')) ?></p><?php endif ?>
 <?php endif ?></div>
-<p><?= $e($t('AUTO_UPLOAD_HELP')) ?> <?= $e($limit['value'].' '.$t('UNIT_'.$limit['unit'])) ?></p>
+<p id="bsl-upload-effective"><?= $e(Text::sprintf('COM_BSLMEDIA_UPLOAD_EFFECTIVE',UploadLimits::format($uploadPolicy['effectiveFile']))) ?></p>
+<details class="mb-2"><summary><?= $e($t('UPLOAD_LIMIT_DETAILS')) ?></summary><ul>
+<li><?= $e($t('LIMIT_COMPONENT')) ?>: <?= $e(UploadLimits::format($uploadPolicy['component'])) ?></li>
+<li><?= $e($t('LIMIT_UPLOAD')) ?>: <?= $e($uploadPolicy['upload']>0?UploadLimits::format($uploadPolicy['upload']):$t('NO_PHP_LIMIT')) ?></li>
+<li><?= $e($t('LIMIT_POST')) ?>: <?= $e($uploadPolicy['post']>0?UploadLimits::format($uploadPolicy['post']):$t('NO_PHP_LIMIT')) ?></li>
+<li><?= $e(Text::sprintf('COM_BSLMEDIA_UPLOAD_COUNT_ALLOWED',$uploadPolicy['maxFiles'])) ?></li>
+</ul><p><?= $e($t('UPLOAD_RESERVE_HELP')) ?></p></details>
+<p><?= $e($t('AUTO_UPLOAD_HELP')) ?></p>
 <p class="small" title="<?= $e($warning) ?>"><?= $e($warning) ?></p>
 <div class="d-flex flex-wrap gap-2 mb-3" id="bsl-folders">
 <?php if($folder!==''): ?><a class="btn btn-secondary" href="<?= $e($link(dirname($folder)==='.'?'':dirname($folder))) ?>">↑ <?= $e($t('UP')) ?></a><?php endif ?>

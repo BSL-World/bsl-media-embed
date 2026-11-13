@@ -7,15 +7,39 @@
   const upload = document.getElementById('bsl-upload-form');
   let uploading = false;
   if (files && trigger && upload) {
-    trigger.disabled = false;
-    trigger.addEventListener('click', () => { if (!uploading) files.click(); });
+    let policy,messages,ready=false;
+    const status=document.getElementById('bsl-upload-status');
+    try{
+      policy=JSON.parse(root.dataset.uploadPolicy);messages=JSON.parse(root.dataset.uploadMessages);
+      ready=typeof globalThis.BslMediaUploadLimits?.check==='function';
+    }catch{ready=false;}
+    const format=bytes=>new Intl.NumberFormat(document.documentElement?.lang||undefined,{maximumFractionDigits:2}).format(bytes/(bytes>=1e9?1e9:1e6))+(bytes>=1e9?' GB':' MB');
+    const exact=bytes=>format(bytes)+' ('+new Intl.NumberFormat(document.documentElement?.lang||undefined).format(bytes)+' B)';
+    const fill=(template,args)=>String(template).replace(/%s/g,()=>String(args.shift()??''));
+    function preflight(){
+      if(!ready){status.textContent=root.dataset.uploadUnavailable;return false;}
+      document.getElementById('bsl-selected-count').value=files.files.length;
+      const fields=[...new FormData(upload)].filter(([,value])=>typeof value==='string');
+      const result=globalThis.BslMediaUploadLimits.check(Array.from(files.files),policy,fields);
+      if(result.ok){status.textContent='';return true;}
+      if(['component','upload'].includes(result.reason))status.textContent=fill(messages.file,[result.name,exact(result.actual),exact(result.limit),messages[result.reason]]);
+      else if(result.reason==='post')status.textContent=fill(messages.post,[exact(result.actual),exact(result.limit)]);
+      else if(result.reason==='count')status.textContent=fill(messages.count,[result.actual,result.limit]);
+      else if(result.reason==='invalid')status.textContent=fill(messages.invalid,[result.name]);
+      else status.textContent=messages[result.reason]||root.dataset.uploadUnavailable;
+      return false;
+    }
+    trigger.disabled=!ready||!policy?.enabled||!policy?.valid||policy?.maxFiles===0;
+    if(trigger.disabled)status.textContent=ready?(messages[policy?.valid?'disabled':'config']||root.dataset.uploadUnavailable):root.dataset.uploadUnavailable;
+    trigger.addEventListener('click', () => { if (!uploading&&!trigger.disabled) files.click(); });
     files.addEventListener('change', () => {
       if (uploading || !files.files.length) return;
-      document.getElementById('bsl-selected-count').value = files.files.length;
+      if(!preflight())return;
       upload.requestSubmit();
     });
     upload.addEventListener('submit', event => {
       if (uploading || !files.files.length) { event.preventDefault(); return; }
+      if(!preflight()){event.preventDefault();return;}
       uploading = true; trigger.disabled = true;
       document.getElementById('bsl-upload-status').textContent = root.dataset.uploading;
     });

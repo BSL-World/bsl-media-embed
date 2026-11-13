@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Joomla\CMS\Language {class Text{public static function _($s){return $s;}}}
+namespace Joomla\CMS\Language {class Text{public static function _($s){return $s;}public static function sprintf($s,...$args){return vsprintf($s,$args);}}}
 namespace Joomla\CMS\HTML {class HTMLHelper{public static function _($s,...$args){return $s==='date'?$args[0]:'<input type="hidden" name="csrf" value="1">';}}}
 namespace {
 define('_JEXEC',1);
@@ -8,6 +8,7 @@ define('JPATH_ROOT',__DIR__);
 require __DIR__.'/../com_bslmedia/site/src/Service/MediaStream.php';
 require __DIR__.'/../com_bslmedia/admin/src/Service/MediaLibrary.php';
 require __DIR__.'/../com_bslmedia/admin/src/Service/RootBrowser.php';
+require __DIR__.'/../com_bslmedia/admin/src/Service/UploadLimits.php';
 $params=new class{public function get($key,$default=null){return $key==='root'?'../media':$default;}};
 $root='';$folder='';$count=0;
 foreach([true,false] as $admin){

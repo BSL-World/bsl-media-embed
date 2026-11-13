@@ -28,7 +28,7 @@ final class BslMedia extends CMSPlugin implements SubscriberInterface
         if (!$wa->assetExists('script', 'editor-button.bslmedia')) {
             // A full same-site URL bypasses WAM's filesystem lookup of /subdirectory/media/.
             $wa->registerScript('editor-button.bslmedia', Uri::root() . 'media/plg_editors-xtd_bslmedia/button.js',
-                ['version' => '0.8.3'], ['type' => 'module'], ['editors']);
+                ['version' => '0.8.4'], ['type' => 'module'], ['editors']);
         }
         // JCE's toolbar menu and Joomla's button layout use different asset names.
         $wa->useScript('editor-button.bslmedia');

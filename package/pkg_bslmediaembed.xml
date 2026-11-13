@@ -2,8 +2,8 @@
 <extension type="package" method="upgrade">
     <name>BSL Media Embed Package</name>
     <packagename>bslmediaembed</packagename>
-    <version>0.8.3</version>
-    <creationDate>2026-11-12</creationDate>
+    <version>0.8.4</version>
+    <creationDate>2026-11-13</creationDate>
     <author>Vasilyev Alexander</author>
     <license>GNU General Public License version 2 or later</license>
     <description>BSL Media Embed content renderer and editor button.</description>

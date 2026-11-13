@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="plugin" group="editors-xtd" method="upgrade">
     <name>PLG_EDITORSXTD_BSLMEDIA</name>
-    <version>0.8.3</version>
-    <creationDate>2026-11-12</creationDate>
+    <version>0.8.4</version>
+    <creationDate>2026-11-13</creationDate>
     <author>Vasilyev Alexander</author>
     <license>GNU General Public License version 2 or later</license>
     <description>PLG_EDITORSXTD_BSLMEDIA_DESCRIPTION</description>

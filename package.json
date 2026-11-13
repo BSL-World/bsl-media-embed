@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/parser.test.mjs tests/library-ui.test.mjs tests/library-table.test.mjs tests/editor-picker.test.mjs tests/formatting.test.mjs tests/root-picker.test.mjs",
+    "test": "node --test tests/parser.test.mjs tests/library-ui.test.mjs tests/library-table.test.mjs tests/editor-picker.test.mjs tests/formatting.test.mjs tests/root-picker.test.mjs tests/upload-preflight.test.mjs",
     "check:js": "node --check plg_editors-xtd_bslmedia/media/parser.js && node --check plg_editors-xtd_bslmedia/media/button.js && node --check plg_editors-xtd_bslmedia/media/library-picker.js && node --check plg_editors-xtd_bslmedia/media/formatting.js"
   }
 }

@@ -14,6 +14,12 @@ foreach ($phpVersion in @('8.1', '8.2', '8.4')) {
     if ($LASTEXITCODE -ne 0) { throw "Media streaming failed: PHP $phpVersion" }
     & $phpPath tests/media-library.test.php
     if ($LASTEXITCODE -ne 0) { throw "Media library failed: PHP $phpVersion" }
+    & $phpPath tests/upload-limits.test.php
+    if ($LASTEXITCODE -ne 0) { throw "Upload limits failed: PHP $phpVersion" }
+    & $phpPath -d post_max_size=160M -d upload_max_filesize=128M tests/upload-controller.test.php
+    if ($LASTEXITCODE -ne 0) { throw "Upload controller failed: PHP $phpVersion" }
+    & $phpPath -d post_max_size=70K -d upload_max_filesize=128M tests/upload-controller.test.php
+    if ($LASTEXITCODE -ne 0) { throw "Upload aggregate bypass failed: PHP $phpVersion" }
     & $phpPath tests/media-depth.test.php
     if ($LASTEXITCODE -ne 0) { throw "Media depth failed: PHP $phpVersion" }
     & $phpPath tests/media-acl.test.php

@@ -2,6 +2,13 @@
 
 All notable changes to BSL Media Embed are documented in this file.
 
+## [0.8.4] - unpublished development candidate, 2026-11-13
+
+- Show effective upload limits from the current web-PHP worker alongside the decimal administrator limit.
+- Check each file, file count and aggregate multipart budget before native form submission; keep large-file contents unread during preflight.
+- Recheck actual temporary-file size and server limits; diagnose oversized discarded POST when Joomla is reachable, including the legacy display route.
+- No automatic PHP/OpenServer configuration changes. PHP startup failures before Joomla still require host configuration changes.
+
 ## [0.8.3] - unpublished development candidate, 2026-11-12
 
 - Remove the create-folder disclosure container's extra border/padding/background and use the same primary button styling as Upload files here.
